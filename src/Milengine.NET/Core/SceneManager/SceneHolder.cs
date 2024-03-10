@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 using Milengine.NET.Core.Interfaces;
-using Milengine.NET.Core.Utilities.InlineOptimalizations.Buffers.InlineParameterBuffer;
+using SharpBgfx;
+using Silk.NET.Windowing;
 
 namespace Milengine.NET.Core.SceneManager;
 
@@ -18,22 +18,29 @@ public class SceneHolder : IDisposable
 
     public int MainCameraIndex { get; set; } = 0;
 
+    public TickCounter CurrentFrameTick { get; }
+
     public SceneHolder(Memory<ICamera> sceneCameras, ref ConcurrentBag<IRenderableObject> renderableObjects)
     {
         SceneCameras = sceneCameras;
         RenderableObjects = renderableObjects;
+        CurrentFrameTick = new TickCounter();
     }
 
-    public async ValueTask ExecuteObjectsInitializationAsync(CancellationToken cancellationToken)
+    public async ValueTask ExecuteObjectsInitializationAsync(WindowOptions windowOptions,
+        CancellationToken cancellationToken)
     {
+        Bgfx.Init();
+        Bgfx.Reset(windowOptions.Size.X, windowOptions.Size.Y, ResetFlags.None);
         await ExecuteObjectsActionAsync((IRenderableObject currentObject) =>
          currentObject.OnInitializationAsync(), cancellationToken, OnObjectInitialization);
     }
 
-    public virtual async ValueTask ExecuteObjectsUpdateAsync(CancellationToken cancellationToken)
+    public virtual async ValueTask ExecuteObjectsUpdateAsync(float deltaTime, CancellationToken cancellationToken)
     {
+        
         await ExecuteObjectsActionAsync((IRenderableObject currentObject) =>
-         currentObject.OnInitializationAsync(), cancellationToken, OnObjectUpdate);
+         currentObject.OnUpdateAsync(deltaTime), cancellationToken, OnObjectUpdate);
     }
 
     private async ValueTask ExecuteObjectsActionAsync(Func<IRenderableObject, Task> objectAsyncFunction,
