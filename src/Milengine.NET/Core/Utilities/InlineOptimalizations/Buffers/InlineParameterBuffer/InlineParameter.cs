@@ -89,6 +89,8 @@ public struct InlineParameter_Three : IInlineIndexParameter { private object _va
 public struct InlineParameter_Three<T> : IInlineIndexParameter { private T _value; public static int Length { get; } = 3; }
 
 [InlineArray(4)]
+public struct InlineParameter_Four : IInlineIndexParameter { private object _value; public static int Length { get; } = 4; }
+[InlineArray(4)]
 public struct InlineParameter_Four<T> : IInlineIndexParameter { private T _value; public static int Length { get; } = 4; }
 
 #pragma warning restore IDE0044

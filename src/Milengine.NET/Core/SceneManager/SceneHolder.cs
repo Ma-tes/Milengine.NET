@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using Milengine.NET.Core.Interfaces;
-using SharpBgfx;
 using Silk.NET.Windowing;
 
 namespace Milengine.NET.Core.SceneManager;
@@ -27,11 +26,9 @@ public class SceneHolder : IDisposable
         CurrentFrameTick = new TickCounter();
     }
 
-    public async ValueTask ExecuteObjectsInitializationAsync(WindowOptions windowOptions,
+    public async ValueTask ExecuteObjectsInitializationAsync(
         CancellationToken cancellationToken)
     {
-        Bgfx.Init();
-        Bgfx.Reset(windowOptions.Size.X, windowOptions.Size.Y, ResetFlags.None);
         await ExecuteObjectsActionAsync((IRenderableObject currentObject) =>
          currentObject.OnInitializationAsync(), cancellationToken, OnObjectInitialization);
     }
