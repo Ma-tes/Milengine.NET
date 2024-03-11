@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Graphics.Structures;
+using Milengine.NET.Core.SceneManager;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
@@ -19,21 +20,26 @@ public class Program
 
     private const string VertexShader = @"
         #version 330 core //Using version GLSL version 3.3
-        layout (location = 0) in vec4 vPos;
-        
+        layout (location = 0) in vec3 vPos;
+        layout (location = 1) in vec3 aColor;
+
+        out vec3 ourColor;
         void main()
         {
             gl_Position = vec4(vPos.x, vPos.y, vPos.z, 1.0);
+            ourColor = aColor;
         }
     ";
 
     private const string FragmentShader = @"
         #version 330 core
         out vec4 FragColor;
+        in vec3 ourColor;
 
+        uniform vec3 additionalColor;
         void main()
         {
-            FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+            FragColor = vec4(ourColor + additionalColor, 1.0f);
         }
     ";
 
@@ -42,14 +48,12 @@ public class Program
     private static VertexArrayBuffer<float, uint> vertexArrayBuffer;
 
     private static uint shaderHandle;
+    private static TickCounter tickCounter;
 
     public static void Main()
     {
         window = Window.Create(windowOptions);
         graphicsContext = new(window);
-        graphicsContext.RelativeResolution = new Vector2D<uint>(
-            400, 200
-        );
 
         window.Load += OnLoad;
         window.Update += OnUpdate;
@@ -60,12 +64,14 @@ public class Program
     private static void OnLoad()
     {
         graphicsContext.GraphicsInitialization();
+        tickCounter = new TickCounter(1);
         vertices =
             new GraphicsBufferData<float>(new ReadOnlyMemory<float>(
-                [0.5f,  0.5f, 0.0f,
-                0.5f, -0.5f, 0.0f,
-                -0.5f, -0.5f, 0.0f,
-                -0.5f,  0.5f, 0.5f]), BufferTargetARB.ArrayBuffer);
+                //X, Y, Z, R, G, B
+                [0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
+                0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 0.0f,
+                -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
+                -0.5f,  0.5f, 0.5f, 0.0f, 0.0f, 0.0f]), BufferTargetARB.ArrayBuffer);
         indices =
             new GraphicsBufferData<uint>(new ReadOnlyMemory<uint>(
                 [0, 1, 3,
@@ -83,11 +89,17 @@ public class Program
         GraphicsContext.Graphics.LinkProgram(shaderHandle);
         //TODO: Add the dispose of relative shaders.
 
-        vertexArrayBuffer.SetVertexAttributePointer(0, 3, VertexAttribPointerType.Float, 3, 0);
+        vertexArrayBuffer.SetVertexAttributePointer(0, 3, VertexAttribPointerType.Float, 6, 0);
+        vertexArrayBuffer.SetVertexAttributePointer(1, 3, VertexAttribPointerType.Float, 6, 3);
     }
 
     private static void OnUpdate(double deltaTime)
     {
+        float relativeColorIndex = Math.Abs(MathF.Sin(tickCounter.CalculateRelativeTimeTick()) * ((float)deltaTime * 50));
+        
+        Console.WriteLine(relativeColorIndex);
+        GraphicsContext.Graphics.Uniform3(GraphicsContext.Graphics.GetUniformLocation(shaderHandle, "additionalColor"),
+            relativeColorIndex, 1.0f, 1.0f);
     }
 
     private static void OnRender(double deltaTime)
@@ -97,6 +109,7 @@ public class Program
 
         GraphicsContext.Graphics.UseProgram(shaderHandle);
         unsafe { GraphicsContext.Graphics.DrawElements(PrimitiveType.Triangles, (uint)indices.Buffer.Length, GLEnum.UnsignedInt, null); }
+        //GraphicsContext.Graphics.DrawArrays(GLEnum.Triangles, 0, 3);
     }
 
     private static uint CreateRelativeShader(string shaderData, ShaderType shaderType)
