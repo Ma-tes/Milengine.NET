@@ -35,7 +35,6 @@ public class SceneHolder : IDisposable
 
     public virtual async ValueTask ExecuteObjectsUpdateAsync(float deltaTime, CancellationToken cancellationToken)
     {
-        
         await ExecuteObjectsActionAsync((IRenderableObject currentObject) =>
          currentObject.OnUpdateAsync(deltaTime), cancellationToken, OnObjectUpdate);
     }

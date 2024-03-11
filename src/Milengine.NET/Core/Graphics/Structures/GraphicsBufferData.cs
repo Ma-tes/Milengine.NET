@@ -6,26 +6,25 @@ using Silk.NET.OpenGL;
 namespace Milengine.NET.Core.Graphics.Structures;
 
 public struct GraphicsBufferData<T> : IGraphicsBindable
-    where T : notnull
+    where T : unmanaged, INumber<T>
 {
-    public uint Handle { get; }
+    public uint Handle { get; } = GraphicsContext.Graphics.GenBuffer();
     public BufferTargetARB BufferTarget { get; }
+    public ReadOnlyMemory<T> Buffer { get; }
 
-    public GraphicsBufferData(ReadOnlySpan<T> data, BufferTargetARB bufferTarget)
+    public GraphicsBufferData(ReadOnlyMemory<T> data, BufferTargetARB bufferTarget)
     {
         BufferTarget = bufferTarget;
-        Handle = GraphicsContext.Graphics.GenBuffer();
+        Buffer = data;
 
-
+        Bind();
+        CreateRelativeBuffer(data.Span);
     }
 
     public void Bind() => GraphicsContext.Graphics.BindBuffer(BufferTarget, Handle);
 
-    private void CreateRealtiveBuffer(ReadOnlySpan<T> data)
-    {
-        int bufferSize = data.Length * Marshal.SizeOf(default(T));
-        GraphicsContext.Graphics.BufferData<T>(BufferTarget, data, BufferUsageARB.StaticDraw);
-    }
+    private void CreateRelativeBuffer(ReadOnlySpan<T> data) =>
+        GraphicsContext.Graphics.BufferData(BufferTarget, data, BufferUsageARB.StaticDraw);
 
-    public void Dispose() {}
+    public void Dispose() { GraphicsContext.Graphics.DeleteBuffer(Handle); }
 }
