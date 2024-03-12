@@ -75,7 +75,7 @@ public class Program
         indices =
             new GraphicsBufferData<uint>(new ReadOnlyMemory<uint>(
                 [0, 1, 3,
-                1, 2, 3]), BufferTargetARB.ElementArrayBuffer);
+                 1, 2, 3]), BufferTargetARB.ElementArrayBuffer);
 
         vertexArrayBuffer = new VertexArrayBuffer<float, uint>(
             vertices, indices
@@ -89,8 +89,8 @@ public class Program
         GraphicsContext.Graphics.LinkProgram(shaderHandle);
         //TODO: Add the dispose of relative shaders.
 
-        vertexArrayBuffer.SetVertexAttributePointer(0, 3, VertexAttribPointerType.Float, 6, 0);
-        vertexArrayBuffer.SetVertexAttributePointer(1, 3, VertexAttribPointerType.Float, 6, 3);
+        GraphicsContext.SetVertexAttributePointer<float>(0, 3, VertexAttribPointerType.Float, 6, 0);
+        GraphicsContext.SetVertexAttributePointer<float>(1, 3, VertexAttribPointerType.Float, 6, 3);
     }
 
     private static void OnUpdate(double deltaTime)

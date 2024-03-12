@@ -1,3 +1,5 @@
+using System.Numerics;
+using System.Runtime.InteropServices;
 using Milengine.NET.Core.SceneManager;
 using Milengine.NET.Core.Utilities.InlineOptimalizations.Buffers.InlineParameterBuffer;
 using Silk.NET.Maths;
@@ -8,7 +10,7 @@ namespace Milengine.NET.Core.Graphics;
 
 public class GraphicsContext : IDisposable
 {
-    public static GL Graphics { get; internal set; }
+    public static GL Graphics { get; internal set; } = null!;
 
     public IWindow Window { get; set; }
     public Vector2D<uint> RelativeResolution { get; set; }
@@ -48,11 +50,19 @@ public class GraphicsContext : IDisposable
         Graphics.Viewport(0, 0, RelativeResolution.X, RelativeResolution.Y);
     }
 
+    public static void SetVertexAttributePointer(uint index, int typeCount,
+        VertexAttribPointerType type, uint vertexSize, int offset)
+    {
+        unsafe { Graphics.VertexAttribPointer(index,
+            typeCount, type, false, vertexSize, (void*)offset); }
+        Graphics.EnableVertexAttribArray(index);
+    }
+
     private void Clear(InlineParameter_Three<ClearBufferMask> bufferMask)
     {
         Graphics.ClearColor(0, 0, 0, 1);
         Graphics.Clear(bufferMask[0] | bufferMask[1] | bufferMask[2]);
     }
 
-    public void Dispose() { Graphics.Dispose(); }
+    public void Dispose() { Graphics!.Dispose(); }
 }
