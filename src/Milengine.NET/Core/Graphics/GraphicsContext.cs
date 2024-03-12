@@ -1,6 +1,3 @@
-using System.Numerics;
-using System.Runtime.InteropServices;
-using Milengine.NET.Core.SceneManager;
 using Milengine.NET.Core.Utilities.InlineOptimalizations.Buffers.InlineParameterBuffer;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;

@@ -1,7 +1,5 @@
-﻿using System.Drawing;
-using Milengine.NET.Core.Graphics;
+﻿using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Graphics.Structures;
-using Milengine.NET.Core.SceneManager;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
@@ -43,12 +41,8 @@ public class Program
         }
     ";
 
-    private static GraphicsBufferData<float> vertices;
-    private static GraphicsBufferData<uint> indices;
-    private static VertexArrayBuffer<float, uint> vertexArrayBuffer;
-
     private static uint shaderHandle;
-    private static TickCounter tickCounter;
+    private static GraphicsMesh graphicsMesh;
 
     public static void Main()
     {
@@ -64,52 +58,43 @@ public class Program
     private static void OnLoad()
     {
         graphicsContext.GraphicsInitialization();
-        tickCounter = new TickCounter(1);
-        vertices =
-            new GraphicsBufferData<float>(new ReadOnlyMemory<float>(
-                //X, Y, Z, R, G, B
-                [0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
-                0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 0.0f,
-                -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
-                -0.5f,  0.5f, 0.5f, 0.0f, 0.0f, 0.0f]), BufferTargetARB.ArrayBuffer);
-        indices =
-            new GraphicsBufferData<uint>(new ReadOnlyMemory<uint>(
-                [0, 1, 3,
-                 1, 2, 3]), BufferTargetARB.ElementArrayBuffer);
+        graphicsMesh = new GraphicsMesh(
+            new ReadOnlyMemory<Vertex<float>>([
+                new Vertex<float>(new(0.5f, 0.5f, 0.0f), new(1.0f, 0.0f, 0.0f), new(1.0f, 1.0f)),
+                new Vertex<float>(new(0.5f, -0.5f, 0.0f), new(0.0f, 1.0f, 0.0f), new(1.0f, 0.0f)),
+                new Vertex<float>(new(-0.5f, -0.5f, 0.0f), new(0.0f, 0.0f, 1.0f), new(0.0f, 0.0f)),
+                new Vertex<float>(new(-0.5f, 0.5f, 0.5f), new(1.0f, 1.0f, 0.0f), new(0.0f, 1.0f))
+            ]),
+            new ReadOnlyMemory<uint>([
+                0, 1, 3,
+                1, 2, 3
+            ]));
 
-        vertexArrayBuffer = new VertexArrayBuffer<float, uint>(
-            vertices, indices
-        );
         uint vertexShader = CreateRelativeShader(VertexShader, ShaderType.VertexShader);
         uint fragmentShader = CreateRelativeShader(FragmentShader, ShaderType.FragmentShader);
 
+        //TODO: Add the dispose of relative shaders.
         shaderHandle = GraphicsContext.Graphics.CreateProgram();
         GraphicsContext.Graphics.AttachShader(shaderHandle, vertexShader);
         GraphicsContext.Graphics.AttachShader(shaderHandle, fragmentShader);
         GraphicsContext.Graphics.LinkProgram(shaderHandle);
-        //TODO: Add the dispose of relative shaders.
 
-        GraphicsContext.SetVertexAttributePointer<float>(0, 3, VertexAttribPointerType.Float, 6, 0);
-        GraphicsContext.SetVertexAttributePointer<float>(1, 3, VertexAttribPointerType.Float, 6, 3);
+        graphicsMesh.LoadMesh();
     }
 
     private static void OnUpdate(double deltaTime)
     {
-        float relativeColorIndex = Math.Abs(MathF.Sin(tickCounter.CalculateRelativeTimeTick()) * ((float)deltaTime * 50));
-        
-        Console.WriteLine(relativeColorIndex);
         GraphicsContext.Graphics.Uniform3(GraphicsContext.Graphics.GetUniformLocation(shaderHandle, "additionalColor"),
-            relativeColorIndex, 1.0f, 1.0f);
+            0.0f, 0.0f, 1.0f);
     }
 
     private static void OnRender(double deltaTime)
     {
         graphicsContext.GraphicsBeginFrameRender();
-        vertexArrayBuffer.Bind();
+        graphicsMesh.VertexArrayBuffer.Bind();
 
         GraphicsContext.Graphics.UseProgram(shaderHandle);
-        unsafe { GraphicsContext.Graphics.DrawElements(PrimitiveType.Triangles, (uint)indices.Buffer.Length, GLEnum.UnsignedInt, null); }
-        //GraphicsContext.Graphics.DrawArrays(GLEnum.Triangles, 0, 3);
+        unsafe { GraphicsContext.Graphics.DrawElements(PrimitiveType.Triangles, (uint)graphicsMesh.Indices.Buffer.Length, GLEnum.UnsignedInt, null); }
     }
 
     private static uint CreateRelativeShader(string shaderData, ShaderType shaderType)

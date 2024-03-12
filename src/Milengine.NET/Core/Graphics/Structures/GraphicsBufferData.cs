@@ -1,12 +1,10 @@
-using System.Numerics;
-using System.Runtime.InteropServices;
 using Milengine.NET.Core.Graphics.Interfaces;
 using Silk.NET.OpenGL;
 
 namespace Milengine.NET.Core.Graphics.Structures;
 
 public struct GraphicsBufferData<T> : IGraphicsBindable
-    where T : unmanaged, INumber<T>
+    where T : unmanaged
 {
     public uint Handle { get; } = GraphicsContext.Graphics.GenBuffer();
     public BufferTargetARB BufferTarget { get; }

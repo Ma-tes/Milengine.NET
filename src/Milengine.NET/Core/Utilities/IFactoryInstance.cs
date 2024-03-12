@@ -20,6 +20,13 @@ public interface IFactoryInstance<TResult, TArg1, TArg2, TArg3, TArg4>
 }
 
 public interface IFactoryInstance<TResult, TArg1, TArg2, TArg3, TArg4,
+    TArg5, TArg6, TArg7, TArg8>
+{
+    public static abstract TResult CreateInstance(TArg1 argumentOne, TArg2 argumentTwo, TArg3 argumentThree, TArg4 argumentFour,
+        TArg5 argumentFive, TArg6 argumentSix, TArg7 argumentSeven, TArg8 argumentEight);
+}
+
+public interface IFactoryInstance<TResult, TArg1, TArg2, TArg3, TArg4,
     TArg5, TArg6, TArg7, TArg8, TArg9>
 {
     public static abstract TResult CreateInstance(TArg1 argumentOne, TArg2 argumentTwo, TArg3 argumentThree, TArg4 argumentFour,

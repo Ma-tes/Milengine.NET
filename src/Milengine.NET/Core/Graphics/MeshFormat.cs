@@ -1,6 +1,5 @@
 using System.Runtime.InteropServices;
 using Milengine.NET.Core.Graphics.Interfaces;
-using Milengine.NET.Core.Utilities.InlineOptimalizations.Buffers.InlineParameterBuffer;
 using Silk.NET.OpenGL;
 
 namespace Milengine.NET.Core.Graphics;
@@ -26,27 +25,27 @@ public readonly struct FormatContainer
     }
 }
 
-public sealed class MeshFormat<T> : IGraphicsBindable
-    where T : IInlineIndexParameter<FormatContainer>
+public struct MeshFormat : IGraphicsBindable
 {
     public uint Handle { get; } = 0;
     public uint Stride { get; }
 
-    public T InlineFormatData { get; }
+    public ReadOnlyMemory<FormatContainer> InlineFormatData { get; }
 
-    public MeshFormat(T inlineFormatData)
+    public MeshFormat(ReadOnlyMemory<FormatContainer> inlineFormatData)
     {
         InlineFormatData = inlineFormatData;
-        Stride = CalculateStride(InlineFormatData);
+        Stride = CalculateStride(InlineFormatData.Span);
     }
 
     public void Bind()
     {
-        int inlineDataLength = T.Length;
+        ReadOnlySpan<FormatContainer> inlineFormatDataSpan = InlineFormatData.Span;
+        int inlineDataLength = inlineFormatDataSpan.Length;
         int relativeOffset = 0;
         for (int i = 0; i < inlineDataLength; i++)
         {
-            FormatContainer currentContainer = InlineFormatData.GetNonDirectInlineParameter(i);
+            FormatContainer currentContainer = inlineFormatDataSpan[i];
             GraphicsContext.SetVertexAttributePointer(currentContainer.Index,
                 (int)currentContainer.Count,
                 currentContainer.Type,
@@ -58,13 +57,13 @@ public sealed class MeshFormat<T> : IGraphicsBindable
         }
     }
 
-    private static uint CalculateStride(T inlineFormatData)
+    private static uint CalculateStride(ReadOnlySpan<FormatContainer> inlineFormatData)
     {
         int returnStride = 0;
-        int inlineDataLength = T.Length;
+        int inlineDataLength = inlineFormatData.Length;
         for (int i = 0; i < inlineDataLength; i++)
         {
-            FormatContainer currentContainer = inlineFormatData.GetNonDirectInlineParameter(i);
+            FormatContainer currentContainer = inlineFormatData[i];
             returnStride += (int)currentContainer.Count * SizeOfVertexAttributeType(currentContainer.Type);
         }
         return (uint)returnStride;
