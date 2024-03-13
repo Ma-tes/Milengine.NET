@@ -11,15 +11,22 @@ public enum FormatCountType : byte
     Vector3D = 3,
 }
 
+public enum VerticesType : byte
+{
+    Position = 0,
+    Color = 1,
+    Texture = 2,
+}
+
 public readonly struct FormatContainer
 {
-    public uint Index { get; }
+    public VerticesType VerticesType { get; }
     public FormatCountType Count { get; }
     public VertexAttribPointerType Type { get; }
 
-    public FormatContainer(uint index, FormatCountType count, VertexAttribPointerType type)
+    public FormatContainer(VerticesType verticesType, FormatCountType count, VertexAttribPointerType type)
     {
-        Index = index;
+        VerticesType = verticesType;
         Count = count;
         Type = type;
     }
@@ -46,7 +53,7 @@ public struct MeshFormat : IGraphicsBindable
         for (int i = 0; i < inlineDataLength; i++)
         {
             FormatContainer currentContainer = inlineFormatDataSpan[i];
-            GraphicsContext.SetVertexAttributePointer(currentContainer.Index,
+            GraphicsContext.SetVertexAttributePointer((uint)currentContainer.VerticesType,
                 (int)currentContainer.Count,
                 currentContainer.Type,
                 Stride,

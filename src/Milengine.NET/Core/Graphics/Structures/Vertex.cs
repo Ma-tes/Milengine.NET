@@ -1,6 +1,4 @@
 using System.Numerics;
-using Milengine.NET.Core.Utilities;
-using Milengine.NET.Core.Utilities.InlineOptimalizations.Buffers.InlineParameterBuffer;
 using Silk.NET.Maths;
 
 namespace Milengine.NET.Core.Graphics.Structures;
@@ -20,50 +18,45 @@ public readonly struct Vertex<T>
         TextureCoordinates = textureCoordinates;
     }
 
-    //TODO: Find a related way of unsafe casting generics
-    //inline array.
-    public static ReadOnlySpan<T> CombineInlineVertexData(Vertex<T> vertex)
+    public static Memory<T> CombineVertexData(Vertex<T> vertex,
+        ReadOnlyMemory<FormatContainer> formatContainer)
     {
-        InlineParameter_Eight<T> returnParameterVertex =
-            InlineValueParameter_Eight<T>.CreateInstance(
-                vertex.Position.X, vertex.Position.Y, vertex.Position.Z,
-                vertex.ColorNormals.X, vertex.ColorNormals.Y, vertex.ColorNormals.Z,
-                vertex.TextureCoordinates.X, vertex.TextureCoordinates.Y);
-        return SpanHelper<T>.CreateFixedParameterReadOnlySpan(returnParameterVertex);
+        Memory<T> vertexData = new Memory<T>(new T[8]);
+        Span<T> vertexDataSpan = vertexData.Span;
+
+        ReadOnlySpan<FormatContainer> formatContainerSpan = formatContainer.Span;
+        int vertexDataCount = 0;
+        for (int i = 0; i < formatContainerSpan.Length; i++)
+        {
+            FormatContainer currentContainer = formatContainerSpan[i];
+            Vector3D<T> relativeVertexData = GetRelativeVertexVector(vertex, currentContainer.VerticesType);
+
+            int currentContainerTypeCount = (int)currentContainer.Count;
+            for (int j = 0; j < currentContainerTypeCount; j++) { vertexDataSpan[vertexDataCount + j] = relativeVertexData[j]; }
+            vertexDataCount += currentContainerTypeCount;
+        }
+        return vertexData;
     }
 
-    public static ReadOnlySpan<T> CombineVertexData(Vertex<T> vertex) =>
-        new ReadOnlySpan<T>([
-            vertex.Position.X, vertex.Position.Y, vertex.Position.Z,
-            vertex.ColorNormals.X, vertex.ColorNormals.Y, vertex.ColorNormals.Z,
-            vertex.TextureCoordinates.X, vertex.TextureCoordinates.Y
-        ]);
-
-    //TODO: Find a related way of unsafe casting generics
-    //inline array.
-    public static ReadOnlyMemory<T> CreateMultipleInlineVertexCombination(ReadOnlySpan<Vertex<T>> vertexCombination)
+    public static ReadOnlyMemory<T> CreateMultipleVertexCombination(ReadOnlySpan<Vertex<T>> vertexCombination,
+        ReadOnlyMemory<FormatContainer> formatContainer)
     {
         int vertexCombinationLength = vertexCombination.Length;
         Memory<T> resultVertexCombination = new Memory<T>(new T[8 * vertexCombinationLength]);
         Span<T> resultVertexCombinationSpan = resultVertexCombination.Span;
         for (int i = 0; i < vertexCombinationLength; i++)
         {
-            ReadOnlySpan<T> relativeVertexData = CombineInlineVertexData(vertexCombination[i]);
-            relativeVertexData.CopyTo(resultVertexCombinationSpan[(i * 8)..]);
+            Span<T> combineVertex = CombineVertexData(vertexCombination[i], formatContainer).Span;
+            //ReadOnlySpan<T> relativeVertexData = SpanHelper<T>.CreateFixedParameterReadOnlySpan(ref combineVertex);
+            combineVertex.CopyTo(resultVertexCombinationSpan[(i * 8)..]);
         }
         return resultVertexCombination;
     }
 
-    public static ReadOnlyMemory<T> CreateMultipleVertexCombination(ReadOnlySpan<Vertex<T>> vertexCombination)
+    private static Vector3D<T> GetRelativeVertexVector(Vertex<T> vertex, VerticesType type) => type switch
     {
-        int vertexCombinationLength = vertexCombination.Length;
-        Memory<T> resultVertexCombination = new Memory<T>(new T[8 * vertexCombinationLength]);
-        Span<T> resultVertexCombinationSpan = resultVertexCombination.Span;
-        for (int i = 0; i < vertexCombinationLength; i++)
-        {
-            ReadOnlySpan<T> relativeVertexData = CombineVertexData(vertexCombination[i]);
-            relativeVertexData.CopyTo(resultVertexCombinationSpan[(i * 8)..]);
-        }
-        return resultVertexCombination;
-    }
+        VerticesType.Position => vertex.Position,
+        VerticesType.Texture => new Vector3D<T>(vertex.TextureCoordinates, Vector3D<T>.Zero.Z),
+        VerticesType.Color => vertex.ColorNormals
+    };
 }

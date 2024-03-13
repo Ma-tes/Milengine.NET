@@ -1,5 +1,10 @@
-﻿using Milengine.NET.Core.Graphics;
+﻿using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Graphics.Structures;
+using Milengine.NET.Core.Utilities;
+using Milengine.NET.Core.Utilities.InlineOptimalizations.Buffers.InlineParameterBuffer;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
@@ -21,10 +26,11 @@ public class Program
         layout (location = 0) in vec3 vPos;
         layout (location = 1) in vec3 aColor;
 
+        uniform mat4 uTransform;
         out vec3 ourColor;
         void main()
         {
-            gl_Position = vec4(vPos.x, vPos.y, vPos.z, 1.0);
+            gl_Position = uTransform * vec4(vPos.x, vPos.y, vPos.z, 1.0);
             ourColor = aColor;
         }
     ";
@@ -46,6 +52,10 @@ public class Program
 
     public static void Main()
     {
+        InlineParameter_Two<float> inlineValueParameter_Two = InlineValueParameter_Two<float>.CreateInstance(0.5f, 1.5f);
+        Span<float> inlineValueParameter_TwoSpan = SpanHelper<float>.CreateFixedParameterSpan(ref inlineValueParameter_Two);
+        var spanResult = MemoryMarshal.CreateSpan(ref Unsafe.As<InlineParameter_Two<float>, float>(ref inlineValueParameter_Two), 2);
+
         window = Window.Create(windowOptions);
         graphicsContext = new(window);
 
@@ -60,10 +70,10 @@ public class Program
         graphicsContext.GraphicsInitialization();
         graphicsMesh = new GraphicsMesh(
             new ReadOnlyMemory<Vertex<float>>([
-                new Vertex<float>(new(0.5f, 0.5f, 0.0f), new(1.0f, 0.0f, 0.0f), new(1.0f, 1.0f)),
-                new Vertex<float>(new(0.5f, -0.5f, 0.0f), new(0.0f, 1.0f, 0.0f), new(1.0f, 0.0f)),
-                new Vertex<float>(new(-0.5f, -0.5f, 0.0f), new(0.0f, 0.0f, 1.0f), new(0.0f, 0.0f)),
-                new Vertex<float>(new(-0.5f, 0.5f, 0.5f), new(1.0f, 1.0f, 0.0f), new(0.0f, 1.0f))
+                new Vertex<float>(new(0.5f, -0.5f, 0.0f), new(1.0f, 0.0f, 0.0f), new(0.0f, 1.0f)),
+                new Vertex<float>(new(0.5f, -0.5f, 0.0f), new(1.0f, 0.25f, 0.0f), new(0.0f, 0.0f)),
+                new Vertex<float>(new(-0.5f, -0.5f, 0.0f), new(1.0f, 0.0f, 0.55f), new(0.0f, 0.0f)),
+                new Vertex<float>(new(-0.5f,  0.5f, 0.5f), new(0.2f, 1.0f, 0.0f), new(0.0f, 0.75f)),
             ]),
             new ReadOnlyMemory<uint>([
                 0, 1, 3,
@@ -84,13 +94,23 @@ public class Program
 
     private static void OnUpdate(double deltaTime)
     {
+        float colorIndex = MathF.Abs(MathF.Sin((float)window.Time));
         GraphicsContext.Graphics.Uniform3(GraphicsContext.Graphics.GetUniformLocation(shaderHandle, "additionalColor"),
-            0.0f, 0.0f, 1.0f);
+            colorIndex, Math.Abs(colorIndex - 0.7f), Math.Abs(colorIndex - 0.5f));
     }
 
     private static void OnRender(double deltaTime)
     {
         graphicsContext.GraphicsBeginFrameRender();
+        var modelValue = Matrix4x4.Identity 
+            * Matrix4x4.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.UnitY, (float)window.Time))
+            * Matrix4x4.CreateScale(1)
+            * Matrix4x4.CreateTranslation(new Vector3(0, 0, 0));
+        unsafe
+        {
+            GraphicsContext.Graphics.UniformMatrix4(GraphicsContext.Graphics.GetUniformLocation(shaderHandle, "uTransform"),
+                1, false, (float*)&modelValue);
+        }
         graphicsMesh.VertexArrayBuffer.Bind();
 
         GraphicsContext.Graphics.UseProgram(shaderHandle);

@@ -19,35 +19,32 @@ public class SceneHolder : IDisposable
 
     public TickCounter CurrentFrameTick { get; }
 
-    public SceneHolder(Memory<ICamera> sceneCameras, ref ConcurrentBag<IRenderableObject> renderableObjects)
+    public SceneHolder(Memory<ICamera> sceneCameras, ConcurrentBag<IRenderableObject> renderableObjects)
     {
         SceneCameras = sceneCameras;
         RenderableObjects = renderableObjects;
         CurrentFrameTick = new TickCounter();
     }
 
-    public async ValueTask ExecuteObjectsInitializationAsync(
-        CancellationToken cancellationToken)
+    public void ExecuteObjectsInitializationAsync()
     {
-        await ExecuteObjectsActionAsync((IRenderableObject currentObject) =>
-         currentObject.OnInitializationAsync(), cancellationToken, OnObjectInitialization);
+        ExecuteObjectsActionAsync((IRenderableObject currentObject) =>
+         currentObject.OnInitialization(), OnObjectInitialization);
     }
 
-    public virtual async ValueTask ExecuteObjectsUpdateAsync(float deltaTime, CancellationToken cancellationToken)
+    public void ExecuteObjectsUpdateAsync(float deltaTime)
     {
-        await ExecuteObjectsActionAsync((IRenderableObject currentObject) =>
-         currentObject.OnUpdateAsync(deltaTime), cancellationToken, OnObjectUpdate);
+        ExecuteObjectsActionAsync((IRenderableObject currentObject) =>
+         currentObject.OnUpdate(deltaTime), OnObjectUpdate);
     }
 
-    private async ValueTask ExecuteObjectsActionAsync(Func<IRenderableObject, Task> objectAsyncFunction,
-        CancellationToken cancellationToken, Action<IRenderableObject>? onObjectAction = null)
+    private void ExecuteObjectsActionAsync(Action<IRenderableObject> objectAsyncFunction,
+        Action<IRenderableObject>? onObjectAction = null)
     {
-        if(cancellationToken.IsCancellationRequested || 
-            RenderableObjects is null || RenderableObjects.Count == 0) { return; }
-
+        if(RenderableObjects is null || RenderableObjects.Count == 0) { return; }
         while(RenderableObjects.TryPeek(out IRenderableObject? renderableObject))
         {
-            await objectAsyncFunction(renderableObject).ConfigureAwait(true);
+            objectAsyncFunction(renderableObject);//.ConfigureAwait(true);
             if(onObjectAction is not null)
                 onObjectAction(renderableObject);
         }

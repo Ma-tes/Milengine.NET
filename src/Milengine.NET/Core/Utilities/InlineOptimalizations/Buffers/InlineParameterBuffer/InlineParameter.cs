@@ -2,10 +2,6 @@ using System.Runtime.CompilerServices;
 
 namespace Milengine.NET.Core.Utilities.InlineOptimalizations.Buffers.InlineParameterBuffer;
 
-public interface IFixedParameter<TInlineParameter, T> : IFactoryInstance<TInlineParameter, T>
-    where TInlineParameter : IInlineIndexParameter
-{
-}
 
 public readonly struct InlineValueParameter_One<T> : IFactoryInstance<InlineParameter_One<T>, T>
 {
