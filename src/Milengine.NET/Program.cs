@@ -5,6 +5,9 @@ using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Graphics.Structures;
 using Milengine.NET.Core.Utilities;
 using Milengine.NET.Core.Utilities.InlineOptimalizations.Buffers.InlineParameterBuffer;
+using Milengine.NET.Parser;
+using Silk.NET.Input;
+using Silk.NET.Input.Sdl;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
@@ -43,12 +46,14 @@ public class Program
         uniform vec3 additionalColor;
         void main()
         {
-            FragColor = vec4(ourColor + additionalColor, 1.0f);
+            FragColor = vec4(vec3(dot(ourColor + additionalColor, vec3(.5, .5, .5))), 1.0f);
         }
     ";
 
     private static uint shaderHandle;
-    private static GraphicsMesh graphicsMesh;
+    private static ReadOnlyMemory<GraphicsMesh> graphicsMesh;
+    private static bool isRunning = false;
+    private static IKeyboard keyboard;
 
     public static void Main()
     {
@@ -68,17 +73,11 @@ public class Program
     private static void OnLoad()
     {
         graphicsContext.GraphicsInitialization();
-        graphicsMesh = new GraphicsMesh(
-            new ReadOnlyMemory<Vertex<float>>([
-                new Vertex<float>(new(0.5f, -0.5f, 0.0f), new(1.0f, 0.0f, 0.0f), new(0.0f, 1.0f)),
-                new Vertex<float>(new(0.5f, -0.5f, 0.0f), new(1.0f, 0.25f, 0.0f), new(0.0f, 0.0f)),
-                new Vertex<float>(new(-0.5f, -0.5f, 0.0f), new(1.0f, 0.0f, 0.55f), new(0.0f, 0.0f)),
-                new Vertex<float>(new(-0.5f,  0.5f, 0.5f), new(0.2f, 1.0f, 0.0f), new(0.0f, 0.75f)),
-            ]),
-            new ReadOnlyMemory<uint>([
-                0, 1, 3,
-                1, 2, 3
-            ]));
+        var inputContext = window.CreateInput();
+        keyboard = inputContext.Keyboards[0];
+
+        ObjFormat objectModel = new ObjFormat();
+        graphicsMesh = objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj");
 
         uint vertexShader = CreateRelativeShader(VertexShader, ShaderType.VertexShader);
         uint fragmentShader = CreateRelativeShader(FragmentShader, ShaderType.FragmentShader);
@@ -89,32 +88,38 @@ public class Program
         GraphicsContext.Graphics.AttachShader(shaderHandle, fragmentShader);
         GraphicsContext.Graphics.LinkProgram(shaderHandle);
 
-        graphicsMesh.LoadMesh();
+        for (int i = 0; i < graphicsMesh.Length; i++) { graphicsMesh.Span[i].LoadMesh(); }
     }
 
     private static void OnUpdate(double deltaTime)
     {
-        float colorIndex = MathF.Abs(MathF.Sin((float)window.Time));
+        float colorIndex = MathF.Abs(MathF.Sin((float)window.Time / 2) - 0.25f);
         GraphicsContext.Graphics.Uniform3(GraphicsContext.Graphics.GetUniformLocation(shaderHandle, "additionalColor"),
-            colorIndex, Math.Abs(colorIndex - 0.7f), Math.Abs(colorIndex - 0.5f));
+            colorIndex * colorIndex, colorIndex + 0.25f, colorIndex + 0.2f);
     }
 
     private static void OnRender(double deltaTime)
     {
         graphicsContext.GraphicsBeginFrameRender();
-        var modelValue = Matrix4x4.Identity 
-            * Matrix4x4.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.UnitY, (float)window.Time))
-            * Matrix4x4.CreateScale(1)
-            * Matrix4x4.CreateTranslation(new Vector3(0, 0, 0));
+        var modelValue = Matrix4x4.Identity
+            * Matrix4x4.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.UnitX, (float)window.Time * MathF.Sin((float)window.Time) / 20))
+            * Matrix4x4.CreateFromQuaternion(Quaternion.CreateFromAxisAngle(Vector3.UnitY, (float)window.Time * MathF.Sin((float)window.Time) / 20))
+            * Matrix4x4.CreateTranslation(new Vector3(0, 0, -50.0f))
+            * Matrix4x4.CreatePerspectiveFieldOfView(45.0f * MathF.PI / 180f, 1024/720, 0.1f, 100.0f);
         unsafe
         {
             GraphicsContext.Graphics.UniformMatrix4(GraphicsContext.Graphics.GetUniformLocation(shaderHandle, "uTransform"),
                 1, false, (float*)&modelValue);
         }
-        graphicsMesh.VertexArrayBuffer.Bind();
-
+        for (int i = 0; i < graphicsMesh.Length; i++) { graphicsMesh.Span[i].VertexArrayBuffer.Bind(); }
         GraphicsContext.Graphics.UseProgram(shaderHandle);
-        unsafe { GraphicsContext.Graphics.DrawElements(PrimitiveType.Triangles, (uint)graphicsMesh.Indices.Buffer.Length, GLEnum.UnsignedInt, null); }
+        for (int i = 0; i < graphicsMesh.Length; i++)
+        {
+            unsafe {
+                //GraphicsContext.Graphics.DrawElements(PrimitiveType.Triangles, (uint)graphicsMesh.Span[i].Indices.Buffer.Length, GLEnum.UnsignedInt, null);
+                GraphicsContext.Graphics.DrawArrays(GLEnum.Triangles, 0, (uint)graphicsMesh.Span[i].Vertices.Buffer.Length);
+            }
+        }
     }
 
     private static uint CreateRelativeShader(string shaderData, ShaderType shaderType)

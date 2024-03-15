@@ -3,13 +3,17 @@ using Silk.NET.Maths;
 
 namespace Milengine.NET.Core.Graphics.Structures;
 
-public readonly struct Vertex<T>
+public struct Vertex<T>
     where T : unmanaged, INumber<T>
 {
-    public Vector3D<T> Position { get; }
-    public Vector3D<T> ColorNormals { get; }
-    public Vector2D<T> TextureCoordinates { get; }
+    public Vector3D<T> Position { get; set; }
+    public Vector3D<T> ColorNormals { get; set; }
+    public Vector2D<T> TextureCoordinates { get; set; }
 
+    public static Vertex<T> Zero { get; } =
+        new Vertex<T>(Vector3D<T>.Zero, Vector3D<T>.Zero, Vector2D<T>.Zero);
+
+    public Vertex() { }
     public Vertex(Vector3D<T> position,
         Vector3D<T> colorNormals, Vector2D<T> textureCoordinates)
     {
@@ -44,13 +48,18 @@ public readonly struct Vertex<T>
         int vertexCombinationLength = vertexCombination.Length;
         Memory<T> resultVertexCombination = new Memory<T>(new T[8 * vertexCombinationLength]);
         Span<T> resultVertexCombinationSpan = resultVertexCombination.Span;
+
+        int vertexDataLength = 0;
         for (int i = 0; i < vertexCombinationLength; i++)
         {
-            Span<T> combineVertex = CombineVertexData(vertexCombination[i], formatContainer).Span;
-            //ReadOnlySpan<T> relativeVertexData = SpanHelper<T>.CreateFixedParameterReadOnlySpan(ref combineVertex);
-            combineVertex.CopyTo(resultVertexCombinationSpan[(i * 8)..]);
+            if(!vertexCombination[i].Equals(Zero))
+            {
+                Span<T> combineVertex = CombineVertexData(vertexCombination[i], formatContainer).Span;
+                combineVertex.CopyTo(resultVertexCombinationSpan[(i * 8)..]);
+                vertexDataLength += combineVertex.Length;
+            }
         }
-        return resultVertexCombination;
+        return resultVertexCombination[..vertexDataLength];
     }
 
     private static Vector3D<T> GetRelativeVertexVector(Vertex<T> vertex, VerticesType type) => type switch

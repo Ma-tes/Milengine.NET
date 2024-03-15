@@ -11,11 +11,12 @@ public enum FormatCountType : byte
     Vector3D = 3,
 }
 
-public enum VerticesType : byte
+public enum VerticesType
 {
-    Position = 0,
-    Color = 1,
-    Texture = 2,
+    Position,
+    Color,
+    Texture,
+    FacesInternal,
 }
 
 public readonly struct FormatContainer

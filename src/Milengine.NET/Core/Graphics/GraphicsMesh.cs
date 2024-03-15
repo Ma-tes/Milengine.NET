@@ -1,9 +1,10 @@
 using Milengine.NET.Core.Graphics.Structures;
+using Milengine.NET.Core.Utilities;
 using Silk.NET.OpenGL;
 
 namespace Milengine.NET.Core.Graphics;
 
-public class GraphicsMesh : IDisposable
+public class GraphicsMesh : IFactoryInstance<GraphicsMesh, ReadOnlyMemory<Vertex<float>>, ReadOnlyMemory<uint>>, IDisposable
 {
     protected virtual ReadOnlyMemory<FormatContainer> meshFormatContainer { get; set; } = new ReadOnlyMemory<FormatContainer>([
             new FormatContainer(verticesType: VerticesType.Position, count: FormatCountType.Vector3D, type: VertexAttribPointerType.Float),
@@ -15,6 +16,9 @@ public class GraphicsMesh : IDisposable
 
     public GraphicsBufferData<float> Vertices { get; internal set; }
     public GraphicsBufferData<uint> Indices { get; internal set; }
+
+    public static GraphicsMesh CreateInstance(ReadOnlyMemory<Vertex<float>> argumentOne,
+     ReadOnlyMemory<uint> argumentTwo) => new(argumentOne, argumentTwo);
 
     public GraphicsMesh(ReadOnlyMemory<Vertex<float>> vertices, ReadOnlyMemory<uint> indices)
     {
