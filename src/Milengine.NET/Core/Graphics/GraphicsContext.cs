@@ -7,13 +7,43 @@ namespace Milengine.NET.Core.Graphics;
 
 public class GraphicsContext : IDisposable
 {
+    public const string VertexShader = @"
+        #version 330 core //Using version GLSL version 3.3
+        layout (location = 0) in vec3 vPos;
+        layout (location = 1) in vec3 aColor;
+
+        uniform mat4 uModel;
+        uniform mat4 uView;
+        uniform mat4 uProjection;
+        out vec3 ourColor;
+        void main()
+        {
+            gl_Position = uProjection * uView * uModel * vec4(vPos.x, vPos.y, vPos.z, 1.0);
+            ourColor = aColor;
+        }
+    ";
+
+    public const string FragmentShader = @"
+        #version 330 core
+        out vec4 FragColor;
+        in vec3 ourColor;
+
+        uniform vec3 additionalColor;
+        void main()
+        {
+            FragColor = vec4(vec3(dot(ourColor + additionalColor, vec3(.5, .5, .5))), 1.0f);
+        }
+    ";
+
     public static GL Graphics { get; internal set; } = null!;
 
     public IWindow Window { get; set; }
+    public uint ShaderHandle { get; set; }
     public Vector2D<uint> RelativeResolution { get; set; }
 
     public PolygonMode CurrentRenderingType { get; set; } =
         PolygonMode.Fill;
+    public static GraphicsContext Global { get; internal set; }
 
     public GraphicsContext(IWindow window)
     {
