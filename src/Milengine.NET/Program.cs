@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.ComponentModel;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Milengine.NET.Core.Graphics;
@@ -55,6 +56,9 @@ public class Program
     private static bool isRunning = false;
     private static IKeyboard keyboard;
 
+    private static double lastWindowTime = 0;
+    private static int frameCounter = 0;
+
     public static void Main()
     {
         InlineParameter_Two<float> inlineValueParameter_Two = InlineValueParameter_Two<float>.CreateInstance(0.5f, 1.5f);
@@ -77,7 +81,10 @@ public class Program
         keyboard = inputContext.Keyboards[0];
 
         ObjFormat objectModel = new ObjFormat();
-        graphicsMesh = objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj");
+        graphicsMesh = new Memory<GraphicsMesh>([
+            objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj").Span[0],
+            objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Crate_2.obj").Span[0],
+        ]);
 
         uint vertexShader = CreateRelativeShader(VertexShader, ShaderType.VertexShader);
         uint fragmentShader = CreateRelativeShader(FragmentShader, ShaderType.FragmentShader);
@@ -93,9 +100,15 @@ public class Program
 
     private static void OnUpdate(double deltaTime)
     {
+        double currentWindowTime = window.Time;
+        double timeDifference = currentWindowTime - lastWindowTime;
+        if(timeDifference >= 1) { Console.WriteLine(frameCounter); frameCounter = 0; lastWindowTime = currentWindowTime; }
+        else { frameCounter++;}
+        Console.WriteLine(1 / timeDifference);
+
         float colorIndex = MathF.Abs(MathF.Sin((float)window.Time / 2) - 0.25f);
         GraphicsContext.Graphics.Uniform3(GraphicsContext.Graphics.GetUniformLocation(shaderHandle, "additionalColor"),
-            colorIndex * colorIndex, colorIndex + 0.25f, colorIndex + 0.2f);
+            (colorIndex * colorIndex) - 0.25f, colorIndex + 0.25f, colorIndex + 0.2f);
     }
 
     private static void OnRender(double deltaTime)
@@ -111,10 +124,10 @@ public class Program
             GraphicsContext.Graphics.UniformMatrix4(GraphicsContext.Graphics.GetUniformLocation(shaderHandle, "uTransform"),
                 1, false, (float*)&modelValue);
         }
-        for (int i = 0; i < graphicsMesh.Length; i++) { graphicsMesh.Span[i].VertexArrayBuffer.Bind(); }
-        GraphicsContext.Graphics.UseProgram(shaderHandle);
         for (int i = 0; i < graphicsMesh.Length; i++)
         {
+            graphicsMesh.Span[i].VertexArrayBuffer.Bind(); 
+            GraphicsContext.Graphics.UseProgram(shaderHandle);
             unsafe {
                 //GraphicsContext.Graphics.DrawElements(PrimitiveType.Triangles, (uint)graphicsMesh.Span[i].Indices.Buffer.Length, GLEnum.UnsignedInt, null);
                 GraphicsContext.Graphics.DrawArrays(GLEnum.Triangles, 0, (uint)graphicsMesh.Span[i].Vertices.Buffer.Length);

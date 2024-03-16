@@ -16,6 +16,13 @@ public sealed class VertexDataInformation
     public int ColorCount { get; set; }
 
     public VertexDataInformation() { }
+
+    public void Reset()
+    {
+        PositionCount = 0;
+        TextureCount = 0;
+        ColorCount = 0;
+    }
 }
 
 public abstract class FormatLoader<T>
@@ -30,6 +37,7 @@ public abstract class FormatLoader<T>
     {
         if(!TryGetFormatDataLines(out Span<string> returnDataLines, path))
             throw new ArgumentException($"Relative mode path: {path} is invalid.");
+
         int currentMeshDataCount = 0;
         var returnModelData = new List<T>();
         while(currentMeshDataCount < (returnDataLines.Length - 1))
@@ -55,6 +63,7 @@ public abstract class FormatLoader<T>
             ));
             currentMeshDataCount += meshDataLength;
         }
+        indicesDataInformation.Reset();
         return returnModelData.ToArray();
     }
 
