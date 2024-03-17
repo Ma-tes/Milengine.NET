@@ -5,8 +5,8 @@ namespace Milengine.NET.Core.Interfaces;
 
 public interface IAsyncRenderableObject
 {
-    public Vector3D<float> Position { get; set; }
-    public Quaternion<float> Rotation { get; set; }
+    public Vector3 Position { get; set; }
+    public Quaternion Rotation { get; set; }
     public float Scale { get; set; }
     public Matrix4x4 ViewMatrix { get; }
 
@@ -17,8 +17,8 @@ public interface IAsyncRenderableObject
 
 public interface IRenderableObject
 {
-    public Vector3D<float> Position { get; set; }
-    public Quaternion<float> Rotation { get; set; }
+    public Vector3 Position { get; set; }
+    public Quaternion Rotation { get; set; }
     public float Scale { get; set; }
     internal Matrix4x4 ViewMatrix { get; }
 

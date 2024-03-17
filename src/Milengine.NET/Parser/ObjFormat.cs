@@ -62,9 +62,9 @@ public sealed class ObjFormat : FormatLoader<GraphicsMesh>
             if(TrySeparateVertexData(out InlineParameter_Three<uint> returnVertexData,
                 dataSeparation[i], indicesSeparator))
             {
-                returnIndices[relativeIndex] = returnVertexData[0] - CalculateVertexOffset(indicesDataInformation.PositionCount);
-                returnIndices[relativeIndex + 1] = returnVertexData[1] - CalculateVertexOffset(indicesDataInformation.TextureCount);
-                returnIndices[relativeIndex + 2] = returnVertexData[2] - CalculateVertexOffset(indicesDataInformation.ColorCount);
+                returnIndices[relativeIndex] = returnVertexData[0];
+                returnIndices[relativeIndex + 1] = returnVertexData[1];
+                returnIndices[relativeIndex + 2] = returnVertexData[2];
             }
         }
         return true;

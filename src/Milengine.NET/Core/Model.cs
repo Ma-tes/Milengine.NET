@@ -10,12 +10,12 @@ public class Model : IRenderableObject
 {
     //TODO: Consider separating related data, into
     //transform structure.
-    public Vector3D<float> Position { get; set; } = Vector3D<float>.Zero;
-    public Quaternion<float> Rotation { get; set; } = Quaternion<float>.Identity;
+    public Vector3 Position { get; set; } = Vector3.Zero;
+    public Quaternion Rotation { get; set; } = Quaternion.Identity;
     public float Scale { get; set; } = 1.0f;
     public Matrix4x4 ViewMatrix =>
-        Matrix4x4.Identity * Matrix4x4.CreateFromQuaternion((Quaternion)Rotation)
-        * Matrix4x4.CreateScale(Scale) * Matrix4x4.CreateTranslation((Vector3)Position);
+        Matrix4x4.Identity * Matrix4x4.CreateFromQuaternion(Rotation)
+        * Matrix4x4.CreateScale(Scale) * Matrix4x4.CreateTranslation(Position);
 
     public ReadOnlyMemory<GraphicsMesh> Meshes { get; protected set; }
 
