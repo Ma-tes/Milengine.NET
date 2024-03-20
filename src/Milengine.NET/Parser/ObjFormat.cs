@@ -16,11 +16,11 @@ public sealed class ObjFormat : FormatLoader<GraphicsMesh>
     private static readonly string indicesSeparator = "/";
 
     protected override ImmutableArray<VertexFormatToken> vertexTokens { get; } = [
-            new VertexFormatToken("v ", VerticesType.Position),
-            new VertexFormatToken("vt ", VerticesType.Texture),
-            new VertexFormatToken("vn ", VerticesType.Color),
-            new VertexFormatToken("f ", VerticesType.FacesInternal)
-        ];
+        new VertexFormatToken("v ", VerticesType.Position),
+        new VertexFormatToken("vt ", VerticesType.Texture),
+        new VertexFormatToken("vn ", VerticesType.Color),
+        new VertexFormatToken("f ", VerticesType.FacesInternal)
+    ];
 
     protected override void SetVertexData(VertexFormatToken vertexFormatToken, string data,
         ref Vertex<float> relativeVertex)
@@ -78,17 +78,17 @@ public sealed class ObjFormat : FormatLoader<GraphicsMesh>
         //TODO: Create more memory efficient way of
         //creating relative value tokens.
         string[] dataSeparation = data.Split(separator);
-        Span<T> vertexData = new T[3];
+        Span<T> currentVertexData = new T[3];
         for (int i = 0; i < dataSeparation.Length; i++)
         {
-            if(!T.TryParse(dataSeparation[i], CultureInfo.InvariantCulture, out vertexData[i]!))
+            if(!T.TryParse(dataSeparation[i], CultureInfo.InvariantCulture, out currentVertexData[i]!))
             {
                 returnVertexData = default;
                 return false;
             }
         }
         returnVertexData = InlineValueParameter_Three<T>.CreateInstance(
-            vertexData[0], vertexData[1], vertexData[2]
+            currentVertexData[0], currentVertexData[1], currentVertexData[2]
         );
         return true;
     }

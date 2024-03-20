@@ -44,7 +44,9 @@ public class Program
         //sceneHolder.RenderableObjects.Add(
         //    new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj")));
         sceneHolder.RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Postava_f_variant.obj")));
+            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Female_Variant.obj")));
+        //sceneHolder.RenderableObjects.Add(
+        //    new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Medkit.obj")));
         sceneHolder.RenderableObjects[0].Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitX, 120);
         
         sceneHolder.ExecuteObjectsInitialization();

@@ -44,11 +44,10 @@ public abstract class FormatLoader<T>
 
     //TODO: Find more memory efficient way of handling
     //related vertex data
-    private InlineParameter_Three<List<Vertex<float>>> vertexData = InlineValueParameter_Three<List<Vertex<float>>>.CreateInstance(
+    private List<Vertex<float>>[] vertexData = [
         new List<Vertex<float>>(),
         new List<Vertex<float>>(),
-        new List<Vertex<float>>()
-    );
+        new List<Vertex<float>>()];
 
     public ReadOnlyMemory<T> LoadFormatModelData(string path)
     {
@@ -57,7 +56,6 @@ public abstract class FormatLoader<T>
 
         int currentMeshDataCount = 0;
         var returnModelData = new List<T>();
-
         while(currentMeshDataCount < (returnDataLines.Length - 1))
         {
             ReadOnlySpan<VertexTokenData> formatMeshData = GetFormatMeshData(out int meshDataLength,
@@ -71,7 +69,7 @@ public abstract class FormatLoader<T>
                 ref List<Vertex<float>> currentVertex = ref vertexData[i];
                 for (int j = 0; j < currentFormatData.Length; j++)
                 {
-                    Vertex<float> currentVertexValue = new Vertex<float>();
+                    var currentVertexValue = new Vertex<float>();
                     SetVertexData(currentFormatToken, currentFormatData[j], ref currentVertexValue);
                     currentVertex.Add(currentVertexValue);
                 }
@@ -104,7 +102,7 @@ public abstract class FormatLoader<T>
         return true;
     }
 
-    private Span<Vertex<float>> CreateRelativeFaceVertexData(InlineParameter_Three<List<Vertex<float>>> vertexData, ReadOnlySpan<uint> indices)
+    private Span<Vertex<float>> CreateRelativeFaceVertexData(List<Vertex<float>>[] vertexData, ReadOnlySpan<uint> indices)
     {
         Span<Vertex<float>> relativeVertexData = new Vertex<float>[indices.Length / 3];
         for (int i = 0; i < relativeVertexData.Length; i++)
@@ -114,7 +112,7 @@ public abstract class FormatLoader<T>
 
             Vector3D<float> vertices = vertexData[0][(int)vertexIndices[0] - 1].Position;
             Vector2D<float> texture = vertexData[1][(int)vertexIndices[1] - 1].TextureCoordinates;
-            Vector3D<float> color = vertexData[2][(int)vertexIndices[2] - 1].ColorNormals;
+            Vector3D<float> color = vertexIndices[2] == 0 ? Vector3D<float>.Zero : vertexData[2][(int)vertexIndices[2] - 1].ColorNormals;
 
             relativeVertexData[i] = new Vertex<float>(vertices, color, texture);
         }
@@ -183,15 +181,29 @@ public abstract class FormatLoader<T>
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int GetIndexOfLineVertex(Span<string> dataLines)
+    {
+        int returnIndex = -1;
+        int vertexTokensLength = vertexTokens.Length;
+        for (int i = 0; i < vertexTokensLength; i++)
+        {
+            VertexFormatToken currentVertexFormat = vertexTokens[i];
+            returnIndex = TryGetIndexOfLineVertexToken(out int currentIndex,
+                currentVertexFormat, dataLines) && (currentIndex < returnIndex || returnIndex == -1) ? currentIndex : returnIndex;
+        }
+        return returnIndex;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool TryGetLastIndexOfLineVertexToken(out int index, VertexFormatToken vertexFormatToken, Span<string> dataLines)
     {
-        if(!TryGetIndexOfLineVertexToken(out int firstIndex, vertexFormatToken, dataLines)) { index = -1; return false; }
         int tokenLength = vertexFormatToken.Name.Length;
         int dataLinesLength = dataLines.Length;
 
+        int firstVertexIndex = GetIndexOfLineVertex(dataLines);
         for (int i = 0; i < dataLinesLength; i++)
         {
-            int relativeIndex = i + firstIndex;
+            int relativeIndex = i + firstVertexIndex;
             string currentTokenData = dataLines[relativeIndex].Length >= tokenLength ? dataLines[relativeIndex][..tokenLength] : string.Empty;
             if(currentTokenData != vertexFormatToken.Name &&
                 IsVertexTypeToken(dataLines[relativeIndex]))
