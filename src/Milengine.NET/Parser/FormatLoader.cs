@@ -37,17 +37,9 @@ public abstract class FormatLoader<T>
     where T : GraphicsMesh, IFactoryInstance<T, ReadOnlyMemory<Vertex<float>>,ReadOnlyMemory<uint>>
 {
     protected abstract ImmutableArray<VertexFormatToken> vertexTokens { get; }
-    protected VertexDataInformation indicesDataInformation { get; set; } = new();
-    protected VertexDataInformation lastIndicesDataInformation { get; set; } = new();
+    public VertexDataInformation IndicesDataInformation { get; protected set; } = new();
 
     public T? CurrentGraphicsMesh { get; private set; }
-
-    //TODO: Find more memory efficient way of handling
-    //related vertex data
-    private List<Vertex<float>>[] vertexData = [
-        new List<Vertex<float>>(),
-        new List<Vertex<float>>(),
-        new List<Vertex<float>>()];
 
     public ReadOnlyMemory<T> LoadFormatModelData(string path)
     {
@@ -56,6 +48,8 @@ public abstract class FormatLoader<T>
 
         int currentMeshDataCount = 0;
         var returnModelData = new List<T>();
+        var vertexData = InlineValueParameter_Three<List<Vertex<float>>>.CreateInstance(
+            [], [], []);
         while(currentMeshDataCount < (returnDataLines.Length - 1))
         {
             ReadOnlySpan<VertexTokenData> formatMeshData = GetFormatMeshData(out int meshDataLength,
@@ -66,23 +60,21 @@ public abstract class FormatLoader<T>
             {
                 Span<string> currentFormatData = formatMeshData[i].Data.Span;
                 VertexFormatToken currentFormatToken = formatMeshData[i].VertexFormatToken;
-                ref List<Vertex<float>> currentVertex = ref vertexData[i];
+
+                Span<Vertex<float>> currentVertexData = new Vertex<float>[currentFormatData.Length];
                 for (int j = 0; j < currentFormatData.Length; j++)
                 {
-                    var currentVertexValue = new Vertex<float>();
-                    SetVertexData(currentFormatToken, currentFormatData[j], ref currentVertexValue);
-                    currentVertex.Add(currentVertexValue);
+                    SetVertexData(currentFormatToken, currentFormatData[j], ref currentVertexData[j]);
                 }
+                vertexData[i].AddRange(currentVertexData);
             }
             returnModelData.Add(T.CreateInstance(
                 CreateRelativeFaceVertexData(vertexData, indices.Span).ToArray(), indices.ToArray()
             ));
             currentMeshDataCount += meshDataLength;
-            lastIndicesDataInformation.Copy(indicesDataInformation);
         }
 
-        indicesDataInformation.Reset();
-        lastIndicesDataInformation.Reset();
+        IndicesDataInformation.Reset();
         return returnModelData.ToArray();
     }
 
@@ -102,7 +94,7 @@ public abstract class FormatLoader<T>
         return true;
     }
 
-    private Span<Vertex<float>> CreateRelativeFaceVertexData(List<Vertex<float>>[] vertexData, ReadOnlySpan<uint> indices)
+    private Span<Vertex<float>> CreateRelativeFaceVertexData(InlineParameter_Three<List<Vertex<float>>> vertexData, ReadOnlySpan<uint> indices)
     {
         Span<Vertex<float>> relativeVertexData = new Vertex<float>[indices.Length / 3];
         for (int i = 0; i < relativeVertexData.Length; i++)
@@ -110,9 +102,9 @@ public abstract class FormatLoader<T>
             int indicesLength = i != relativeVertexData.Length - 1 ? (i * 3) + 3 : indices.Length;
             ReadOnlySpan<uint> vertexIndices = indices[(i * 3)..indicesLength];
 
-            Vector3D<float> vertices = vertexData[0][(int)vertexIndices[0] - 1].Position;
-            Vector2D<float> texture = vertexData[1][(int)vertexIndices[1] - 1].TextureCoordinates;
-            Vector3D<float> color = vertexIndices[2] == 0 ? Vector3D<float>.Zero : vertexData[2][(int)vertexIndices[2] - 1].ColorNormals;
+            Vector3D<float> vertices = vertexIndices[0] == 0 ? Vector3D<float>.Zero : vertexData[0][(int)vertexIndices[0] - 1].Position;
+            Vector2D<float> texture = vertexIndices[1] == 0 ? Vector2D<float>.Zero : vertexData[1][(int)vertexIndices[1] - 1].TextureCoordinates;
+            Vector3D<float> color = vertexIndices[2] == 0  ? Vector3D<float>.Zero : vertexData[2][(int)vertexIndices[2] - 1].ColorNormals;
 
             relativeVertexData[i] = new Vertex<float>(vertices, color, texture);
         }
@@ -135,49 +127,6 @@ public abstract class FormatLoader<T>
             }
         }
         return returnVertexTokenData.ToArray().AsMemory();
-    }
-
-    private int GetVertexLength(VerticesType verticesType, ReadOnlySpan<VertexTokenData> vertexTokenData)
-    {
-        int vertexTokenDataLength = vertexTokenData.Length;
-        for (int i = 0; i < vertexTokenDataLength; i++)
-        {
-            VertexTokenData relativeVertexSize = vertexTokenData[i];
-            if(relativeVertexSize.VertexFormatToken.Type == verticesType)
-                return relativeVertexSize.Data.Length;
-        }
-        return -1;
-    }
-
-    private int GetMaximumVertexLength(ReadOnlySpan<VertexTokenData> formatTokens)
-    {
-        int formatTokensLength = formatTokens.Length;
-        int currentVertexSize = 0;
-        for (int i = 0; i < formatTokensLength; i++)
-        {
-            int relativeVertexSize = formatTokens[i].Data.Length;
-            if(relativeVertexSize > currentVertexSize) currentVertexSize = relativeVertexSize;
-        }
-        return currentVertexSize;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool TryGetIndexOfLineVertexToken(out int index, VertexFormatToken vertexFormatToken, Span<string> dataLines)
-    {
-        int tokenLength = vertexFormatToken.Name.Length;
-        int dataLinesLength = dataLines.Length;
-
-        for (int i = 0; i < dataLinesLength; i++)
-        {
-            string currentTokenData = dataLines[i].Length >= tokenLength ? dataLines[i][..tokenLength] : string.Empty;
-            if(currentTokenData == vertexFormatToken.Name)
-            {
-                index = i;
-                return true;
-            }
-        }
-        index = -1;
-        return false;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -234,6 +183,25 @@ public abstract class FormatLoader<T>
             if(currentTokenData == currentVertexTokenData.Name)
                 return true;
         }
+        return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool TryGetIndexOfLineVertexToken(out int index, VertexFormatToken vertexFormatToken, Span<string> dataLines)
+    {
+        int tokenLength = vertexFormatToken.Name.Length;
+        int dataLinesLength = dataLines.Length;
+
+        for (int i = 0; i < dataLinesLength; i++)
+        {
+            string currentTokenData = dataLines[i].Length >= tokenLength ? dataLines[i][..tokenLength] : string.Empty;
+            if(currentTokenData == vertexFormatToken.Name)
+            {
+                index = i;
+                return true;
+            }
+        }
+        index = -1;
         return false;
     }
 

@@ -64,7 +64,7 @@ public class SceneHolder : IDisposable
             Vector3.UnitY
         );
         Matrix4x4 projectionView = Matrix4x4.CreatePerspectiveFieldOfView(
-            MathF.PI * 45.0f / 180.0f, Window.FramebufferSize.X / Window.FramebufferSize.Y, 0.1f, 100.0f
+            MathF.PI * 45.0f / 180.0f, Window.FramebufferSize.X / Window.FramebufferSize.Y, 25f, 100.0f
         );
 
         unsafe

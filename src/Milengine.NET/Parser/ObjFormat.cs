@@ -31,11 +31,11 @@ public sealed class ObjFormat : FormatLoader<GraphicsMesh>
         var vertexVector = new Vector3D<float>(vertexData[0], vertexData[1], vertexData[2]);
 
         if(currentVerticesType == VerticesType.Position)
-            { relativeVertex.Position = vertexVector; indicesDataInformation.PositionCount++; }
+            { relativeVertex.Position = vertexVector; IndicesDataInformation.PositionCount++; }
         if(currentVerticesType == VerticesType.Color)
-            { relativeVertex.ColorNormals = vertexVector; indicesDataInformation.ColorCount++; }
+            { relativeVertex.ColorNormals = vertexVector; IndicesDataInformation.ColorCount++; }
         if(currentVerticesType == VerticesType.Texture)
-            { relativeVertex.TextureCoordinates = new Vector2D<float>(vertexVector.X, vertexVector.Y); indicesDataInformation.TextureCount++; }
+            { relativeVertex.TextureCoordinates = new Vector2D<float>(vertexVector.X, vertexVector.Y); IndicesDataInformation.TextureCount++; }
     }
 
     protected override ReadOnlyMemory<uint> GetIndicesData(ReadOnlySpan<string> indicesData)
