@@ -1,7 +1,6 @@
 using System.Numerics;
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Interfaces;
-using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 
 namespace Milengine.NET.Core;

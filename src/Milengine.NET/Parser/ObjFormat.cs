@@ -46,6 +46,8 @@ public sealed class ObjFormat : FormatLoader<GraphicsMesh>
             string currentData = indicesData[i];
             if(currentData.Length != 0 && TryGetCombinationIndicesData(out uint[] currentIndices, currentData[2..]))
                 returnIndices.AddRange(currentIndices);
+            else if(currentData.Length != 0 && TrySeparateVertexData(out InlineParameter_Three<uint> returnData, currentData[2..], vertexSeparator))
+                returnIndices.AddRange([returnData[0], returnData[1], returnData[2]]);
         }
         return returnIndices.ToArray();
     }
@@ -64,14 +66,12 @@ public sealed class ObjFormat : FormatLoader<GraphicsMesh>
             {
                 returnIndices[relativeIndex] = returnVertexData[0];
                 returnIndices[relativeIndex + 1] = returnVertexData[1];
-                returnIndices[relativeIndex + 2] = returnVertexData[2];
+                returnIndices [relativeIndex + 2] = returnVertexData[2];
             }
         }
         return true;
     }
 
-    private static uint CalculateVertexOffset(int offset) =>
-        offset == 0 ? 0 : (uint)offset - 1;
     private static bool TrySeparateVertexData<T>([NotNullWhen(true)] out InlineParameter_Three<T> returnVertexData,
         string data, string separator) where T : INumber<T>
     {

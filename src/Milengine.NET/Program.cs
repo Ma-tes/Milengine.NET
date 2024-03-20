@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using System.Runtime.CompilerServices;
 using Milengine.NET.Core;
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.SceneManager;
@@ -42,10 +41,10 @@ public class Program
         keyboard = inputManager.Keyboards[0];
 
         ObjFormat objectModel = new ObjFormat();
+        //sceneHolder.RenderableObjects.Add(
+        //    new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj")));
         sceneHolder.RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj")));
-        sceneHolder.RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Crate_2.obj")));
+            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Postava_f_variant.obj")));
         sceneHolder.RenderableObjects[0].Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitX, 120);
         
         sceneHolder.ExecuteObjectsInitialization();

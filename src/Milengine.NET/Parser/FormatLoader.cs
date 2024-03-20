@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Graphics.Structures;
 using Milengine.NET.Core.Utilities;
+using Milengine.NET.Core.Utilities.InlineOptimalizations.Buffers.InlineParameterBuffer;
 using Milengine.NET.Parser.Structure;
 using Silk.NET.Maths;
 
@@ -35,13 +36,19 @@ public sealed class VertexDataInformation
 public abstract class FormatLoader<T>
     where T : GraphicsMesh, IFactoryInstance<T, ReadOnlyMemory<Vertex<float>>,ReadOnlyMemory<uint>>
 {
-    private List<Vertex<float>> vertexHolder = new();
-
     protected abstract ImmutableArray<VertexFormatToken> vertexTokens { get; }
     protected VertexDataInformation indicesDataInformation { get; set; } = new();
     protected VertexDataInformation lastIndicesDataInformation { get; set; } = new();
 
     public T? CurrentGraphicsMesh { get; private set; }
+
+    //TODO: Find more memory efficient way of handling
+    //related vertex data
+    private InlineParameter_Three<List<Vertex<float>>> vertexData = InlineValueParameter_Three<List<Vertex<float>>>.CreateInstance(
+        new List<Vertex<float>>(),
+        new List<Vertex<float>>(),
+        new List<Vertex<float>>()
+    );
 
     public ReadOnlyMemory<T> LoadFormatModelData(string path)
     {
@@ -57,33 +64,32 @@ public abstract class FormatLoader<T>
                 returnDataLines[currentMeshDataCount..]).Span;
 
             var indices = GetIndicesData(formatMeshData[formatMeshData.Length - 1].Data.Span);
-            int maximumVertexTokenSize = GetMaximumVertexLength(formatMeshData);
-            Span<Vertex<float>> vertexData = new Vertex<float>[maximumVertexTokenSize];
             for (int i = 0; i < formatMeshData.Length - 1; i++)
             {
                 Span<string> currentFormatData = formatMeshData[i].Data.Span;
                 VertexFormatToken currentFormatToken = formatMeshData[i].VertexFormatToken;
+                ref List<Vertex<float>> currentVertex = ref vertexData[i];
                 for (int j = 0; j < currentFormatData.Length; j++)
                 {
-                    ref Vertex<float> currentVertex = ref vertexData[j];
-                    SetVertexData(currentFormatToken, currentFormatData[j], ref currentVertex);
+                    Vertex<float> currentVertexValue = new Vertex<float>();
+                    SetVertexData(currentFormatToken, currentFormatData[j], ref currentVertexValue);
+                    currentVertex.Add(currentVertexValue);
                 }
             }
-            vertexHolder.AddRange(vertexData.ToArray());
             returnModelData.Add(T.CreateInstance(
-                CreateRelativeFaceVertexData(vertexHolder.Count - vertexData.Length, indices.Span).ToArray(), indices.ToArray()
+                CreateRelativeFaceVertexData(vertexData, indices.Span).ToArray(), indices.ToArray()
             ));
             currentMeshDataCount += meshDataLength;
             lastIndicesDataInformation.Copy(indicesDataInformation);
         }
 
-        vertexHolder = new();
         indicesDataInformation.Reset();
         lastIndicesDataInformation.Reset();
         return returnModelData.ToArray();
     }
 
     protected abstract void SetVertexData(VertexFormatToken vertexFormatToken, string data, ref Vertex<float> relativeVertex);
+
     protected abstract ReadOnlyMemory<uint> GetIndicesData(ReadOnlySpan<string> indicesData);
 
     protected virtual bool TryGetRelativeSeparateFormatMesh([NotNullWhen(true)]out VertexTokenData returnVertexTokenData, Span<string> dataLines, int relativeIndex)
@@ -98,7 +104,7 @@ public abstract class FormatLoader<T>
         return true;
     }
 
-    private Span<Vertex<float>> CreateRelativeFaceVertexData(int offset, ReadOnlySpan<uint> indices)
+    private Span<Vertex<float>> CreateRelativeFaceVertexData(InlineParameter_Three<List<Vertex<float>>> vertexData, ReadOnlySpan<uint> indices)
     {
         Span<Vertex<float>> relativeVertexData = new Vertex<float>[indices.Length / 3];
         for (int i = 0; i < relativeVertexData.Length; i++)
@@ -106,9 +112,9 @@ public abstract class FormatLoader<T>
             int indicesLength = i != relativeVertexData.Length - 1 ? (i * 3) + 3 : indices.Length;
             ReadOnlySpan<uint> vertexIndices = indices[(i * 3)..indicesLength];
 
-            Vector3D<float> vertices = vertexHolder[offset + ((int)vertexIndices[0] - 1 - lastIndicesDataInformation.PositionCount)].Position;
-            Vector2D<float> texture = vertexHolder[offset + ((int)vertexIndices[1] - 1 - lastIndicesDataInformation.TextureCount)].TextureCoordinates;
-            Vector3D<float> color = vertexHolder[offset + ((int)vertexIndices[2] - 1 - lastIndicesDataInformation.ColorCount)].ColorNormals;
+            Vector3D<float> vertices = vertexData[0][(int)vertexIndices[0] - 1].Position;
+            Vector2D<float> texture = vertexData[1][(int)vertexIndices[1] - 1].TextureCoordinates;
+            Vector3D<float> color = vertexData[2][(int)vertexIndices[2] - 1].ColorNormals;
 
             relativeVertexData[i] = new Vertex<float>(vertices, color, texture);
         }
@@ -131,6 +137,18 @@ public abstract class FormatLoader<T>
             }
         }
         return returnVertexTokenData.ToArray().AsMemory();
+    }
+
+    private int GetVertexLength(VerticesType verticesType, ReadOnlySpan<VertexTokenData> vertexTokenData)
+    {
+        int vertexTokenDataLength = vertexTokenData.Length;
+        for (int i = 0; i < vertexTokenDataLength; i++)
+        {
+            VertexTokenData relativeVertexSize = vertexTokenData[i];
+            if(relativeVertexSize.VertexFormatToken.Type == verticesType)
+                return relativeVertexSize.Data.Length;
+        }
+        return -1;
     }
 
     private int GetMaximumVertexLength(ReadOnlySpan<VertexTokenData> formatTokens)
