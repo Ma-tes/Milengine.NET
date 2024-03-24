@@ -1,3 +1,4 @@
+using Milengine.NET.Core.Utilities;
 using Milengine.NET.Core.Utilities.InlineOptimalizations.Buffers.InlineParameterBuffer;
 using Silk.NET.Maths;
 
@@ -6,28 +7,49 @@ namespace Milengine.NET.Core.Structures;
 public enum Direction : uint
 {
     Up = 0,
-    Down = 1,
-    Left = 2,
-    Right = 3,
+    Right = 2,
+    Front = 4,
 }
 
-public sealed record DirectionValue(Direction Direction, Vector3D<float> Value);
+public sealed class DirectionValue
+{
+    public Direction Direction { get; }
+    public Vector3D<float> Value { get; set; }
 
-public readonly struct CameraConfiguration 
+    public DirectionValue(Direction direction, Vector3D<float> value)
+    {
+        Direction = direction;
+        Value = value;
+    }
+}
+
+public struct CameraConfiguration 
 {
     public float FieldOfView { get; }
     public float Zoom { get; }
     public float Sensivity { get; }
 
-    public InlineValueParameter_Four<DirectionValue> CameraDirections { get; }
-
+    public Memory<DirectionValue> CameraDirections { get; set; }
 
     public CameraConfiguration(float fieldOfView, float zoom,
-        float sensivity, InlineValueParameter_Four<DirectionValue> directions)
+        float sensivity, InlineParameter_Three<DirectionValue> directions)
     {
         FieldOfView = fieldOfView;
         Zoom = zoom;
         Sensivity = sensivity;
-        CameraDirections = directions;
+        CameraDirections = SpanHelper<DirectionValue>.CreateFixedParameterSpan(ref directions).ToArray();
+    }
+
+    public readonly ref DirectionValue GetRelativeDirectionValue(Direction direction)
+    {
+        int directionValues = InlineParameter_Three.Length;
+        Span<DirectionValue> directionValuesSpan = CameraDirections.Span;
+        for (int i = 0; i < directionValues; i++)
+        {
+            ref DirectionValue currentDirectionValue = ref directionValuesSpan[i];
+            if(currentDirectionValue.Direction == direction)
+                return ref currentDirectionValue;
+        }
+        throw new ArgumentException($"Current camera directions do not contain specific direction: {direction}");
     }
 }

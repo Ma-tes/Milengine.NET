@@ -43,7 +43,7 @@ public class GraphicsContext : IDisposable
 
     public PolygonMode CurrentRenderingType { get; set; } =
         PolygonMode.Fill;
-    public static GraphicsContext Global { get; internal set; }
+    public static GraphicsContext Global { get; internal set; } = null!;
 
     public GraphicsContext(IWindow window)
     {

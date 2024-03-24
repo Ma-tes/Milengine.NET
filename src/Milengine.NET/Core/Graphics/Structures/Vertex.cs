@@ -66,6 +66,8 @@ public struct Vertex<T>
     {
         VerticesType.Position => vertex.Position,
         VerticesType.Texture => new Vector3D<T>(vertex.TextureCoordinates, Vector3D<T>.Zero.Z),
-        VerticesType.Color => vertex.ColorNormals
+        VerticesType.Color => vertex.ColorNormals,
+        VerticesType.FacesInternal => vertex.ColorNormals,
+        _ => Vector3D<T>.Zero
     };
 }
