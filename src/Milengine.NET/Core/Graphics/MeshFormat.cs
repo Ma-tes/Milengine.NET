@@ -1,23 +1,9 @@
 using System.Runtime.InteropServices;
+using Milengine.NET.Core.Graphics.Enums;
 using Milengine.NET.Core.Graphics.Interfaces;
 using Silk.NET.OpenGL;
 
 namespace Milengine.NET.Core.Graphics;
-
-public enum FormatCountType : byte
-{
-    Vector1D = 1,
-    Vector2D = 2,
-    Vector3D = 3,
-}
-
-public enum VerticesType
-{
-    Position,
-    Color,
-    Texture,
-    FacesInternal,
-}
 
 public readonly struct FormatContainer
 {

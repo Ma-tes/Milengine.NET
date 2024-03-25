@@ -9,6 +9,8 @@ namespace Milengine.NET.Core.Cameras;
 
 public sealed class ViewCamera : ICamera
 {
+    private Vector2 lastMousePosition = Vector2.Zero;
+
     public Vector3D<float> Position { get; set; }
 
     public float Yaw { get; internal set; } = -90.0f;
@@ -37,7 +39,8 @@ public sealed class ViewCamera : ICamera
 
     public void CalculateMouseViewDirections(Vector2 mousePosition)
     {
-        var relativeMousePosition = CalculateRelativeMouseDirection(mousePosition) * CameraConfiguration.Sensivity;
+        var relativeMousePosition = mousePosition - lastMousePosition;//CalculateRelativeMouseDirection(mousePosition) * CameraConfiguration.Sensivity;
+
         Yaw += relativeMousePosition.X; 
         Pitch = Math.Clamp(Pitch + relativeMousePosition.Y, -89.0f, 89.0f);
         Console.WriteLine($"X: {relativeMousePosition.X}\nY: {relativeMousePosition.Y}\n");
@@ -57,6 +60,7 @@ public sealed class ViewCamera : ICamera
             Vector3D.Cross(CameraConfiguration.GetRelativeDirectionValue(Direction.Right).Value,
                 CameraConfiguration.GetRelativeDirectionValue(Direction.Front).Value)
         );
+        lastMousePosition = mousePosition;
     }
 
     public Matrix4X4<float> CalculateProjectionView() =>
@@ -66,8 +70,8 @@ public sealed class ViewCamera : ICamera
 
     private static Vector2D<float> CalculateRelativeMouseDirection(Vector2 mousePosition)
     {
-        float frameBufferX = GraphicsContext.Global.Window.FramebufferSize.X;
-        float frameBufferY = GraphicsContext.Global.Window.FramebufferSize.Y; 
+        float frameBufferX = GraphicsContext.Global.Window.FramebufferSize.X / 2;
+        float frameBufferY = GraphicsContext.Global.Window.FramebufferSize.Y / 2; 
         if(mousePosition.X < 0 || mousePosition.X > frameBufferX ||
             mousePosition.Y < 0 || mousePosition.Y > frameBufferY)
             return Vector2D<float>.Zero;

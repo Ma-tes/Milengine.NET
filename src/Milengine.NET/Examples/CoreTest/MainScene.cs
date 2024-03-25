@@ -37,11 +37,11 @@ public sealed class MainScene : SceneHolder
         unsafe{
             GraphicsContext.Global.WindowGlfw.SetInputMode(GlfwWindowing.GetHandle(GraphicsContext.Global.Window),
                 CursorStateAttribute.Cursor,
-                CursorModeValue.CursorHidden
+                CursorModeValue.CursorDisabled 
             );
         }
 
-        ObjFormat objectModel = new ObjFormat();
+        var objectModel = new ObjFormat();
         RenderableObjects.Add(
             new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj")));
         RenderableObjects.Add(
@@ -49,7 +49,7 @@ public sealed class MainScene : SceneHolder
         RenderableObjects.Add(
             new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Medkit.obj")));
         RenderableObjects[0].Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitX, 120);
-        
+
         base.ExecuteObjectsInitialization();
     }
 

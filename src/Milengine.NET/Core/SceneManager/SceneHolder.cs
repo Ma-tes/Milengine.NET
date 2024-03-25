@@ -108,7 +108,7 @@ public class SceneHolder : IDisposable
         int renderableObjectsCount = RenderableObjects.Count;
         for (int i = 0; i < renderableObjectsCount; i++)
         {
-            objectAsyncFunction(RenderableObjects[i]);//.ConfigureAwait(true);
+            objectAsyncFunction(RenderableObjects[i]);
             if(onObjectAction is not null)
                 onObjectAction(RenderableObjects[i]);
         }
