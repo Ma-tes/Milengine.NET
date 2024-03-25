@@ -2,8 +2,10 @@
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Interfaces;
 using Milengine.NET.Examples.CoreTest;
+using Silk.NET.GLFW;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
+using Silk.NET.Windowing.Glfw;
 
 namespace Milengine.NET;
 public class Program
@@ -18,7 +20,11 @@ public class Program
 
     public static void Main()
     {
+        GlfwWindowing.RegisterPlatform();
+        GlfwWindowing.Use();
+
         var currentWindow = Window.Create(windowOptions);
+
         testScene = new(currentWindow, new Memory<ICamera>([new ViewCamera()]));
         GraphicsContext.Global = new GraphicsContext(testScene.Window);
 

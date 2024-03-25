@@ -1,7 +1,9 @@
 using Milengine.NET.Core.Utilities.InlineOptimalizations.Buffers.InlineParameterBuffer;
+using Silk.NET.GLFW;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
+using Silk.NET.Windowing.Glfw;
 
 namespace Milengine.NET.Core.Graphics;
 
@@ -38,6 +40,8 @@ public class GraphicsContext : IDisposable
     public static GL Graphics { get; internal set; } = null!;
 
     public IWindow Window { get; set; }
+    public Glfw WindowGlfw { get; set; }
+
     public uint ShaderHandle { get; set; }
     public Vector2D<uint> RelativeResolution { get; set; }
 
@@ -48,6 +52,7 @@ public class GraphicsContext : IDisposable
     public GraphicsContext(IWindow window)
     {
         Window = window;
+        WindowGlfw = GlfwWindowing.GetExistingApi(Window)!;
         RelativeResolution = new Vector2D<uint>(
             (uint)Window.Size.X, (uint)Window.Size.Y);
     }

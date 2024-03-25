@@ -5,9 +5,11 @@ using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Interfaces;
 using Milengine.NET.Core.SceneManager;
 using Milengine.NET.Parser;
+using Silk.NET.GLFW;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
+using Silk.NET.Windowing.Glfw;
 
 namespace Milengine.NET.Examples.CoreTest;
 
@@ -29,6 +31,15 @@ public sealed class MainScene : SceneHolder
         var inputManager = Window.CreateInput();
         keyboard = inputManager.Keyboards[0];
         mouse = inputManager.Mice[0];
+
+        //TODO: Create more specific input handler, with
+        //additional utilities for certain controlling.
+        unsafe{
+            GraphicsContext.Global.WindowGlfw.SetInputMode(GlfwWindowing.GetHandle(GraphicsContext.Global.Window),
+                CursorStateAttribute.Cursor,
+                CursorModeValue.CursorHidden
+            );
+        }
 
         ObjFormat objectModel = new ObjFormat();
         RenderableObjects.Add(
