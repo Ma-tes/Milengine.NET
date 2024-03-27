@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Numerics;
 using Milengine.NET.Core.Graphics;
+using Milengine.NET.Core.Graphics.Enums;
 using Milengine.NET.Core.Graphics.Structures;
 using Milengine.NET.Core.Utilities.InlineOptimalizations.Buffers.InlineParameterBuffer;
 using Milengine.NET.Parser.Structure;

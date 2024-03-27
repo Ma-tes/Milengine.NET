@@ -1,3 +1,4 @@
+using Milengine.NET.Core.Graphics.Enums;
 using Milengine.NET.Core.Graphics.Structures;
 using Milengine.NET.Core.Utilities;
 using Silk.NET.OpenGL;
@@ -20,12 +21,23 @@ public class GraphicsMesh : IFactoryInstance<GraphicsMesh, ReadOnlyMemory<Vertex
     public static GraphicsMesh CreateInstance(ReadOnlyMemory<Vertex<float>> argumentOne,
      ReadOnlyMemory<uint> argumentTwo) => new(argumentOne, argumentTwo);
 
+    public static GraphicsMesh CreateInstance(Vertex<float>[] argumentOne,
+     uint[] argumentTwo) => new(argumentOne, argumentTwo);
+
+    public GraphicsMesh(Vertex<float>[] vertices, uint[] indices)
+    {
+        Vertices = new GraphicsBufferData<float>(Vertex<float>.CreateMultipleVertexCombination(vertices, meshFormatContainer), BufferTargetARB.ArrayBuffer);
+        Indices = new GraphicsBufferData<uint>(indices, BufferTargetARB.ElementArrayBuffer);
+        MeshFormat = new MeshFormat(meshFormatContainer);
+    }
+
     public GraphicsMesh(ReadOnlyMemory<Vertex<float>> vertices, ReadOnlyMemory<uint> indices)
     {
         Vertices = new GraphicsBufferData<float>(Vertex<float>.CreateMultipleVertexCombination(vertices.Span, meshFormatContainer), BufferTargetARB.ArrayBuffer);
         Indices = new GraphicsBufferData<uint>(indices, BufferTargetARB.ElementArrayBuffer);
         MeshFormat = new MeshFormat(meshFormatContainer);
     }
+
 
     //TODO: Use for return a specific result type, for
     //better exception handling.

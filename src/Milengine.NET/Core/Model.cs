@@ -1,6 +1,6 @@
-using System.Numerics;
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Interfaces;
+using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 
 namespace Milengine.NET.Core;
@@ -9,12 +9,12 @@ public class Model : IRenderableObject
 {
     //TODO: Consider separating related data, into
     //transform structure.
-    public Vector3 Position { get; set; } = Vector3.Zero;
-    public Quaternion Rotation { get; set; } = Quaternion.Identity;
+    public Vector3D<float> Position { get; set; } = Vector3D<float>.Zero;
+    public Quaternion<float> Rotation { get; set; } = Quaternion<float>.Identity;
     public float Scale { get; set; } = 1.0f;
-    public Matrix4x4 ViewMatrix =>
-        Matrix4x4.Identity * Matrix4x4.CreateFromQuaternion(Rotation)
-        * Matrix4x4.CreateScale(Scale) * Matrix4x4.CreateTranslation(Position);
+    public Matrix4X4<float> ViewMatrix =>
+        Matrix4X4<float>.Identity * Matrix4X4.CreateFromQuaternion(Rotation)
+        * Matrix4X4.CreateScale(Scale) * Matrix4X4.CreateTranslation(Position);
 
     public ReadOnlyMemory<GraphicsMesh> Meshes { get; protected set; }
 
@@ -36,7 +36,7 @@ public class Model : IRenderableObject
     {
         unsafe
         {
-            Matrix4x4 currentModelMatrix = ViewMatrix;
+            Matrix4X4<float> currentModelMatrix = ViewMatrix;
             GraphicsContext.Graphics.UniformMatrix4(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "uModel"),
                 1, false, (float*)&currentModelMatrix);
         }

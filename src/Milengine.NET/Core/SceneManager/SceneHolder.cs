@@ -1,4 +1,3 @@
-using System.Numerics;
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Interfaces;
 using Silk.NET.Maths;
@@ -32,6 +31,7 @@ public class SceneHolder : IDisposable
         SceneCameras = sceneCameras;
         CurrentFrameTick = new TickCounter();
         Window = window;
+        RenderableObjects.AddRange(GetRelativeRenderableCameras(sceneCameras.Span.ToArray()));
     }
 
     public void Initializate()
@@ -70,33 +70,22 @@ public class SceneHolder : IDisposable
     public virtual void ExecuteObjectsRender(double deltaTime)
     {
         GraphicsContext.Global.GraphicsBeginFrameRender();
-        //Matrix4x4 cameraView = Matrix4x4.CreateLookAt(
-        //    new Vector3(0.0f, 0.0f, 30f),
-        //    new Vector3(0.0f, 0.0f, 29f),
-        //    Vector3.UnitY
-        //);
-        //Matrix4x4 projectionView = Matrix4x4.CreatePerspectiveFieldOfView(
-        //    MathF.PI * 45.0f / 180.0f, Window.FramebufferSize.X / Window.FramebufferSize.Y, 25f, 100.0f
-        //);
-
         unsafe
         {
-            //GraphicsContext.Graphics.UniformMatrix4(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "uView"),
-            //    1, false, (float*)&cameraView);
-            //GraphicsContext.Graphics.UniformMatrix4(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "uProjection"),
-            //    1, false, (float*)&projectionView);
-
-            Matrix4X4<float> currentCameraView = CurrentCamera.CalculateCameraView();
             Matrix4X4<float> currentCameraProjectionView = CurrentCamera.CalculateProjectionView();
-
-            GraphicsContext.Graphics.UniformMatrix4(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "uView"),
-                1, false, (float*)&currentCameraView);
             GraphicsContext.Graphics.UniformMatrix4(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "uProjection"),
                 1, false, (float*)&currentCameraProjectionView);
+
+            Matrix4X4<float> currentCameraView = CurrentCamera.CalculateCameraView();
+            GraphicsContext.Graphics.UniformMatrix4(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "uView"),
+                1, false, (float*)&currentCameraView);
             ExecuteObjectsAction((IRenderableObject currentObject) =>
             {
-                GraphicsContext.Graphics.UseProgram(GraphicsContext.Global.ShaderHandle);
-                currentObject.OnRender((float)deltaTime);
+                if(!currentObject.Equals(SceneCameras.Span[MainCameraIndex]))
+                {
+                    GraphicsContext.Graphics.UseProgram(GraphicsContext.Global.ShaderHandle);
+                    currentObject.OnRender((float)deltaTime);
+                }
             }, OnObjectUpdate);
         }
     }
@@ -120,6 +109,16 @@ public class SceneHolder : IDisposable
         GraphicsContext.Graphics.ShaderSource(shaderHandle, shaderData);
         GraphicsContext.Graphics.CompileShader(shaderHandle);
         return shaderHandle;
+    }
+
+    private static IEnumerable<IRenderableObject> GetRelativeRenderableCameras(ICamera[] cameras)
+    {
+        int camerasLenght = cameras.Length;
+        for (int i = 0; i < camerasLenght; i++)
+        {
+            ICamera currentCamera = cameras[i];
+            if(currentCamera.IsRenderable) yield return (IRenderableObject)currentCamera;
+        }
     }
 
     public void Dispose() { }

@@ -1,4 +1,4 @@
-using Milengine.NET.Core.Graphics;
+using Milengine.NET.Core.Graphics.Enums;
 
 namespace Milengine.NET.Parser.Structure;
 

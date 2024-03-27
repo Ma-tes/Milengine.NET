@@ -1,4 +1,5 @@
 using System.Numerics;
+using Milengine.NET.Core.Graphics.Enums;
 using Silk.NET.Maths;
 
 namespace Milengine.NET.Core.Graphics.Structures;
@@ -20,6 +21,14 @@ public struct Vertex<T>
         Position = position;
         ColorNormals = colorNormals;
         TextureCoordinates = textureCoordinates;
+    }
+
+    public Vertex(Vector3D<T> position,
+        Vector3D<T> colorNormals)
+    {
+        Position = position;
+        ColorNormals = colorNormals;
+        TextureCoordinates = Vector2D<T>.Zero;
     }
 
     public static Memory<T> CombineVertexData(Vertex<T> vertex,

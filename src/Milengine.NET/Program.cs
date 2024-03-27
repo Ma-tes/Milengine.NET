@@ -24,7 +24,10 @@ public class Program
 
         var currentWindow = Window.Create(windowOptions);
 
-        testScene = new(currentWindow, new Memory<ICamera>([new ViewCamera()]));
+        testScene = new(currentWindow, new Memory<ICamera>([
+            new ViewCamera(),
+            new ViewCamera() { Position = 20 * Vector3D<float>.UnitY}
+        ]));
         GraphicsContext.Global = new GraphicsContext(testScene.Window);
 
         testScene.Initializate();
