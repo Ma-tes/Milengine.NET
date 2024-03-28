@@ -29,14 +29,19 @@ public struct CameraConfiguration
     public float Zoom { get; }
     public float Sensivity { get; }
 
+    public float ClippingPlaneNear { get; set; }
+    public float ClippingPlaneFar { get; set; }
+
     public Memory<DirectionValue> CameraDirections { get; set; }
 
     public CameraConfiguration(float fieldOfView, float zoom,
-        float sensivity, InlineParameter_Three<DirectionValue> directions)
+        float sensivity, float clippingPlaneNear, float clippingPlaneFar, InlineParameter_Three<DirectionValue> directions)
     {
         FieldOfView = fieldOfView;
         Zoom = zoom;
         Sensivity = sensivity;
+        ClippingPlaneNear = clippingPlaneNear;
+        ClippingPlaneFar = clippingPlaneFar;
         CameraDirections = SpanHelper<DirectionValue>.CreateFixedParameterSpan(ref directions).ToArray();
     }
 

@@ -1,5 +1,3 @@
-using System.Collections.Immutable;
-using System.Numerics;
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Graphics.Structures;
 using Milengine.NET.Core.Interfaces;
@@ -12,108 +10,7 @@ namespace Milengine.NET.Core.Cameras;
 
 public sealed class ViewCamera : ICamera, IRenderableObject
 {
-    private static readonly ImmutableArray<Vertex<float>> graphicsMeshVertexData = [
-        new Vertex<float>(
-            new(0.25f, 0.0f, 0.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(0.75f, 0.0f, 0.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(0.25f, 0.75f, 0.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(0.75f, 0.75f, 0.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-
-        new Vertex<float>(
-            new(0.0f, 0.0f, 1.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(1.0f, 0.0f, 1.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(0.0f, 1.0f, 1.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(1.0f, 1.0f, 1.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-
-        new Vertex<float>(
-            new(0.25f, 0.0f, 0.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(0.0f, 0.0f, 1.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(0.75f, 0.0f, 0.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(1.0f, 0.0f, 1.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(0.25f, 0.75f, 0.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(0.0f, 1.0f, 1.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(0.75f, 0.75f, 0.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(1.0f, 1.0f, 1.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-
-        new Vertex<float>(
-            new(0.25f, 0.0f, 0.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(0.25f, 0.75f, 0.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(0.75f, 0.0f, 0.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(0.75f, 0.75f, 0.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-
-        new Vertex<float>(
-            new(0.0f, 0.0f, 1.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(0.0f, 1.0f, 1.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(1.0f, 0.0f, 1.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-        new Vertex<float>(
-            new(1.0f, 1.0f, 1.0f),
-            new(1.0f, 0.0f, 0.0f)
-        ),
-    ];
+    private Memory<Vertex<float>> graphicsMeshVertexData;
 
     public Vector3D<float> Position { get; set; } = Vector3D<float>.Zero;
     public Quaternion<float> Rotation { get; set; } = Quaternion<float>.Identity;
@@ -134,6 +31,8 @@ public sealed class ViewCamera : ICamera, IRenderableObject
         zoom: 1.0f,
         //Pixels per second
         sensivity: 1.0f,
+        clippingPlaneNear: 2.0f,
+        clippingPlaneFar: 200.0f,
         InlineValueParameter_Three<DirectionValue>.CreateInstance(
             new DirectionValue(Direction.Up, new(0.0f, 1.0f, 0.0f)),
             new DirectionValue(Direction.Right, new(1.0f, 0.0f, 0.0f)),
@@ -145,7 +44,8 @@ public sealed class ViewCamera : ICamera, IRenderableObject
 
     public void OnInitialization() 
     {
-        CameraViewModel = new GraphicsMesh([..graphicsMeshVertexData], []);
+        graphicsMeshVertexData = CreateCameraMeshVertices(CameraConfiguration.ClippingPlaneNear, CameraConfiguration.ClippingPlaneFar);
+        CameraViewModel = new GraphicsMesh([..graphicsMeshVertexData.Span], []);
         CameraViewModel.LoadMesh();
     }
     public void OnUpdate(float deltaTime) { }
@@ -180,9 +80,6 @@ public sealed class ViewCamera : ICamera, IRenderableObject
 
         Yaw += relativeXPosition; 
         Pitch = Math.Clamp(Pitch + relativeYPosition, -89.0f, 89.0f);
-        Console.WriteLine($"X: {relativeXPosition}\nY: {relativeYPosition}\n");
-        Console.WriteLine($"Pitch: {Pitch}");
-
         CameraConfiguration.GetRelativeDirectionValue(Direction.Front).Value = Vector3D.Normalize(new Vector3D<float>(
             MathF.Cos(GetRadiansFromDegrees(Yaw)) * MathF.Cos(GetRadiansFromDegrees(Pitch)),
             MathF.Sin(GetRadiansFromDegrees(Pitch)),
@@ -205,24 +102,54 @@ public sealed class ViewCamera : ICamera, IRenderableObject
 
     public Matrix4X4<float> CalculateProjectionView() =>
         Matrix4X4.CreatePerspectiveFieldOfView(
-            GetRadiansFromDegrees(CameraConfiguration.FieldOfView), GraphicsContext.Global.Window.FramebufferSize.X / GraphicsContext.Global.Window.FramebufferSize.Y, 25f, 100.0f
+            GetRadiansFromDegrees(CameraConfiguration.FieldOfView),
+                GraphicsContext.Global.Window.FramebufferSize.X / GraphicsContext.Global.Window.FramebufferSize.Y,
+                    CameraConfiguration.ClippingPlaneNear, CameraConfiguration.ClippingPlaneFar
         );
 
-    private static Vector2D<float> CalculateRelativeMouseDirection(Vector2 mousePosition)
+    private static Memory<Vertex<float>> CreateCameraMeshVertices(float nearPlane, float farPlane)
     {
-        float frameBufferX = GraphicsContext.Global.Window.FramebufferSize.X / 2;
-        float frameBufferY = GraphicsContext.Global.Window.FramebufferSize.Y / 2; 
-        if(mousePosition.X < 0 || mousePosition.X > frameBufferX ||
-            mousePosition.Y < 0 || mousePosition.Y > frameBufferY)
-            return Vector2D<float>.Zero;
-
-        float centerX = frameBufferX / 2;
-        float centerY = frameBufferY / 2;
-        return new Vector2D<float>(
-            centerX - mousePosition.X,
-            centerY - mousePosition.Y
+        Memory<Vertex<float>> vertices = new Vertex<float>[32];
+        Span<Vertex<float>> verticesSpan = vertices.Span;
+        InlineParameter_Two<float> planes = InlineValueParameter_Two<float>.CreateInstance(
+            nearPlane, farPlane
         );
+        int planesLength = InlineParameter_Two<float>.Length;
+        for (int i = 0; i < planesLength; i++)
+        {
+            float currentPlane = planes[i];
+            int relativeVerticesIndex = i * 16;
+            float verticesPosition = Math.Clamp(currentPlane / 50, 1.0f, 500.0f);
+            float verticesYPositionIndexer = i * -1.5f;
+
+            verticesSpan[relativeVerticesIndex] = new(new Vector3D<float>(-1.0f * verticesPosition,
+                verticesYPositionIndexer + 0.0f, verticesPosition));
+            verticesSpan[relativeVerticesIndex + 1] = new(new Vector3D<float>(1.0f * verticesPosition,
+                verticesYPositionIndexer + 0.0f, verticesPosition));
+            verticesSpan[relativeVerticesIndex + 2] = new(new Vector3D<float>(1.0f * verticesPosition,
+                verticesYPositionIndexer + 1.0f * verticesPosition, verticesPosition));
+            verticesSpan[relativeVerticesIndex + 3] = new(new Vector3D<float>(-1.0f * verticesPosition,
+                verticesYPositionIndexer + 1.0f * verticesPosition, verticesPosition));
+            verticesSpan[relativeVerticesIndex + 4] = new(new Vector3D<float>(-1.0f * verticesPosition,
+                verticesYPositionIndexer + 0.0f, verticesPosition));
+            verticesSpan[relativeVerticesIndex + 5] = new(new Vector3D<float>(-1.0f * verticesPosition,
+                verticesYPositionIndexer + 1.0f * verticesPosition, verticesPosition));
+            verticesSpan[relativeVerticesIndex + 6] = new(new Vector3D<float>(1.0f * verticesPosition,
+                verticesYPositionIndexer + 0.0f, verticesPosition));
+            verticesSpan[relativeVerticesIndex + 7] = new(new Vector3D<float>(1.0f * verticesPosition,
+                verticesYPositionIndexer + 1.0f * verticesPosition, verticesPosition));
+
+            int relativePlaneLength = 4;
+            for (int j = 0; j < relativePlaneLength; j++)
+            {
+                int currentIndex = relativeVerticesIndex + 8 + (j * 2);
+                verticesSpan[currentIndex] = new(new Vector3D<float>(0.0f, 0.5f, 0.0f));
+                verticesSpan[currentIndex + 1] = verticesSpan[relativeVerticesIndex + j];
+            }
+        }
+        return vertices;
     }
+
 
     private static float GetRadiansFromDegrees(float degree) =>
         MathF.PI / 180.0f * degree;

@@ -31,6 +31,13 @@ public struct Vertex<T>
         TextureCoordinates = Vector2D<T>.Zero;
     }
 
+    public Vertex(Vector3D<T> position)
+    {
+        Position = position;
+        ColorNormals = Vector3D<T>.Zero;
+        TextureCoordinates = Vector2D<T>.Zero;
+    }
+
     public static Memory<T> CombineVertexData(Vertex<T> vertex,
         ReadOnlyMemory<FormatContainer> formatContainer)
     {

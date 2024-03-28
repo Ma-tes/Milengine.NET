@@ -79,7 +79,7 @@ public sealed class MainScene : SceneHolder
                         viewCamera.CameraConfiguration.GetRelativeDirectionValue(Direction.Front).Value,
                         viewCamera.CameraConfiguration.GetRelativeDirectionValue(Direction.Up).Value)) * cameraVelocity * (float)deltaTime;
 
-            if(keyboard.IsKeyPressed(Key.Space)) 
+            if(keyboard.IsKeyPressed(Key.Space))
                 viewCamera.Position += Vector3D<float>.UnitY * cameraVelocity * (float)deltaTime;
             if(keyboard.IsKeyPressed(Key.ShiftLeft))
                 viewCamera.Position -= Vector3D<float>.UnitY * cameraVelocity * (float)deltaTime;
