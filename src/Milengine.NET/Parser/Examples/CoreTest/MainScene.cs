@@ -9,6 +9,7 @@ using Milengine.NET.Parser;
 using Silk.NET.GLFW;
 using Silk.NET.Input;
 using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using Silk.NET.Windowing.Glfw;
 
@@ -50,10 +51,6 @@ public sealed class MainScene : SceneHolder
             new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj")));
         RenderableObjects.Add(
             new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Char1.obj")));
-        RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Medkit.obj")){
-                 Position = new(0.0f, 0.0f, 10.0f)});
-
         base.ExecuteObjectsInitialization();
     }
 
@@ -98,6 +95,13 @@ public sealed class MainScene : SceneHolder
 
     public override void ExecuteObjectsRender(double deltaTime)
     {
+        GraphicsContext.Graphics.BindFramebuffer(GLEnum.Framebuffer, 0);
         base.ExecuteObjectsRender(deltaTime);
+        GraphicsContext.Graphics.BindFramebuffer(GLEnum.DrawFramebuffer, 0);
+        GraphicsContext.Graphics.BlitFramebuffer(
+            0, 0, (int)GraphicsContext.Global.RelativeResolution.X, (int)GraphicsContext.Global.RelativeResolution.Y, 0, 0, Window.FramebufferSize.X, Window.FramebufferSize.Y,
+            ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit,
+            GLEnum.Nearest
+        );
     }
 }

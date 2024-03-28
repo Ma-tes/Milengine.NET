@@ -53,7 +53,7 @@ public class SceneHolder : IDisposable
         GraphicsContext.Graphics.LinkProgram(GraphicsContext.Global.ShaderHandle);
 
         ExecuteObjectsAction((IRenderableObject currentObject) =>
-         currentObject.OnInitialization(), OnObjectInitialization);
+            currentObject.OnInitialization(), OnObjectInitialization);
     }
 
     public virtual void ExecuteObjectsUpdate(double deltaTime)

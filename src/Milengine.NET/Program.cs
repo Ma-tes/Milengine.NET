@@ -23,12 +23,15 @@ public class Program
         GlfwWindowing.Use();
 
         var currentWindow = Window.Create(windowOptions);
-
+ 
         testScene = new(currentWindow, new Memory<ICamera>([
             new ViewCamera(),
             new ViewCamera() { Position = 20 * Vector3D<float>.UnitY}
         ]));
-        GraphicsContext.Global = new GraphicsContext(testScene.Window);
+        GraphicsContext.Global = new GraphicsContext(testScene.Window)
+        {
+            RelativeResolution = new Vector2D<uint>(256, 144)
+        };
 
         testScene.Initializate();
         currentWindow.Run();

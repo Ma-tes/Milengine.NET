@@ -79,7 +79,7 @@ public class GraphicsContext : IDisposable
                 ClearBufferMask.StencilBufferBit
             )
         );
-        //Graphics.Viewport(0, 0, RelativeResolution.X, RelativeResolution.Y);
+        Graphics.Viewport(0, 0, RelativeResolution.X, RelativeResolution.Y);
     }
 
     public static void SetVertexAttributePointer(uint index, int typeCount,
