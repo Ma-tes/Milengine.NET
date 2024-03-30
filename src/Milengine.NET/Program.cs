@@ -11,11 +11,9 @@ public class Program
 {
     private static readonly WindowOptions windowOptions = WindowOptions.Default with
     {
-        Size = new Vector2D<int>(1024, 720),
+        Size = new Vector2D<int>(1200, 600),
         Title = "Window test",
     };
-
-    private static MainScene testScene;
 
     public static void Main()
     {
@@ -24,13 +22,13 @@ public class Program
 
         var currentWindow = Window.Create(windowOptions);
  
-        testScene = new(currentWindow, new Memory<ICamera>([
+        MainScene testScene = new(currentWindow, new Memory<ICamera>([
             new ViewCamera(),
             new ViewCamera() { Position = 20 * Vector3D<float>.UnitY}
         ]));
         GraphicsContext.Global = new GraphicsContext(testScene.Window)
         {
-            RelativeResolution = new Vector2D<uint>(256, 144)
+            RelativeResolution = new Vector2D<uint>(255, 144)
         };
 
         testScene.Initializate();

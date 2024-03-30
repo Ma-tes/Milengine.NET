@@ -104,7 +104,7 @@ public abstract class FormatLoader<T>
 
             Vector3D<float> vertices = vertexIndices[0] == 0 ? Vector3D<float>.Zero : vertexData[0][(int)vertexIndices[0] - 1].Position;
             Vector2D<float> texture = vertexIndices[1] == 0 ? Vector2D<float>.Zero : vertexData[1][(int)vertexIndices[1] - 1].TextureCoordinates;
-            Vector3D<float> color = vertexIndices[2] == 0  ? Vector3D<float>.Zero : vertexData[2][(int)vertexIndices[2] - 1].ColorNormals;
+            Vector3D<float> color = vertexIndices[2] == 0 ? Vector3D<float>.Zero : vertexData[2][(int)vertexIndices[2] - 1].ColorNormals;
 
             relativeVertexData[i] = new Vertex<float>(vertices, color, texture);
         }

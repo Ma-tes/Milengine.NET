@@ -1,3 +1,4 @@
+using System.Numerics;
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Interfaces;
 using Silk.NET.Maths;
@@ -12,11 +13,12 @@ public class Model : IRenderableObject
     public Vector3D<float> Position { get; set; } = Vector3D<float>.Zero;
     public Quaternion<float> Rotation { get; set; } = Quaternion<float>.Identity;
     public float Scale { get; set; } = 1.0f;
-    public Matrix4X4<float> ViewMatrix =>
-        Matrix4X4<float>.Identity * Matrix4X4.CreateFromQuaternion(Rotation)
-        * Matrix4X4.CreateScale(Scale) * Matrix4X4.CreateTranslation(Position);
+    public Matrix4x4 ViewMatrix =>
+        Matrix4x4.Identity * Matrix4x4.CreateFromQuaternion(new Quaternion(Rotation.X, Rotation.Y, Rotation.Z, Rotation.W))
+        * Matrix4x4.CreateScale(Scale) * Matrix4x4.CreateTranslation(new Vector3(Position.X, Position.Y, Position.Z));
 
     public ReadOnlyMemory<GraphicsMesh> Meshes { get; protected set; }
+    public Texture TextureTemporaryHolder { get; set; }
 
     public Model(ReadOnlyMemory<GraphicsMesh> meshes)
     {
@@ -27,6 +29,7 @@ public class Model : IRenderableObject
     {
         int meshesLength = Meshes.Length;
         var meshesSpan = Meshes.Span;
+        TextureTemporaryHolder.LoadUnsafeTexture();
         for (int i = 0; i < meshesLength; i++) { meshesSpan[i].LoadMesh(); }
     }
 
@@ -36,7 +39,7 @@ public class Model : IRenderableObject
     {
         unsafe
         {
-            Matrix4X4<float> currentModelMatrix = ViewMatrix;
+            Matrix4x4 currentModelMatrix = ViewMatrix;
             GraphicsContext.Graphics.UniformMatrix4(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "uModel"),
                 1, false, (float*)&currentModelMatrix);
         }
@@ -44,7 +47,8 @@ public class Model : IRenderableObject
         for (int i = 0; i < meshesLength; i++)
         {
             Meshes.Span[i].VertexArrayBuffer.Bind(); 
-            unsafe { GraphicsContext.Graphics.DrawArrays(GLEnum.Triangles, 0, (uint)Meshes.Span[i].Vertices.Buffer.Length); }
+            TextureTemporaryHolder.Bind();
+            unsafe { GraphicsContext.Graphics.DrawArrays(GLEnum.Triangles, 0, (uint)Meshes.Span[i].Indices.Buffer.Length / sizeof(ushort)); }
         }
     }
 }

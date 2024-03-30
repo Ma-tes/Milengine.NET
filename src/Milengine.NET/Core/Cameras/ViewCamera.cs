@@ -1,3 +1,4 @@
+using System.Numerics;
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Graphics.Structures;
 using Milengine.NET.Core.Interfaces;
@@ -16,9 +17,9 @@ public sealed class ViewCamera : ICamera, IRenderableObject
     public Quaternion<float> Rotation { get; set; } = Quaternion<float>.Identity;
 
     public float Scale { get; set; } = 5.0f;
-    public Matrix4X4<float> ViewMatrix =>
-        Matrix4X4<float>.Identity * Matrix4X4.CreateFromQuaternion(Rotation)
-        * Matrix4X4.CreateScale(Scale) * Matrix4X4.CreateTranslation(Position);
+    public Matrix4x4 ViewMatrix =>
+        Matrix4x4.Identity * Matrix4x4.CreateFromQuaternion(new Quaternion(Rotation.X, Rotation.Y, Rotation.Z, Rotation.W))
+        * Matrix4x4.CreateScale(Scale) * Matrix4x4.CreateTranslation(new Vector3(Position.X, Position.Y, Position.Z));
 
     public float Yaw { get; internal set; } = -90.0f;
     public float Pitch { get; internal set; } = 0.0f;
@@ -31,8 +32,8 @@ public sealed class ViewCamera : ICamera, IRenderableObject
         zoom: 1.0f,
         //Pixels per second
         sensivity: 1.0f,
-        clippingPlaneNear: 2.0f,
-        clippingPlaneFar: 200.0f,
+        clippingPlaneNear: 2f,
+        clippingPlaneFar: 100f,
         InlineValueParameter_Three<DirectionValue>.CreateInstance(
             new DirectionValue(Direction.Up, new(0.0f, 1.0f, 0.0f)),
             new DirectionValue(Direction.Right, new(1.0f, 0.0f, 0.0f)),
@@ -54,7 +55,7 @@ public sealed class ViewCamera : ICamera, IRenderableObject
     {
         unsafe
         {
-            Matrix4X4<float> currentModelMatrix = ViewMatrix;
+            Matrix4x4 currentModelMatrix = ViewMatrix;
             GraphicsContext.Graphics.UniformMatrix4(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "uModel"),
                 1, false, (float*)&currentModelMatrix);
         }
@@ -120,7 +121,7 @@ public sealed class ViewCamera : ICamera, IRenderableObject
             float currentPlane = planes[i];
             int relativeVerticesIndex = i * 16;
             float verticesPosition = Math.Clamp(currentPlane / 50, 1.0f, 500.0f);
-            float verticesYPositionIndexer = i * -1.5f;
+            float verticesYPositionIndexer = i * -0.5f;
 
             verticesSpan[relativeVerticesIndex] = new(new Vector3D<float>(-1.0f * verticesPosition,
                 verticesYPositionIndexer + 0.0f, verticesPosition));

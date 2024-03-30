@@ -13,15 +13,19 @@ public class GraphicsContext : IDisposable
         #version 330 core //Using version GLSL version 3.3
         layout (location = 0) in vec3 vPos;
         layout (location = 1) in vec3 aColor;
+        layout (location = 2) in vec2 aTextureCoordinates;
 
         uniform mat4 uModel;
         uniform mat4 uView;
         uniform mat4 uProjection;
+
         out vec3 ourColor;
+        out vec2 ourTextureCoordinates;
         void main()
         {
             gl_Position = uProjection * uView * uModel * vec4(vPos.x, vPos.y, vPos.z, 1.0);
             ourColor = aColor;
+            ourTextureCoordinates = aTextureCoordinates;
         }
     ";
 
@@ -29,11 +33,13 @@ public class GraphicsContext : IDisposable
         #version 330 core
         out vec4 FragColor;
         in vec3 ourColor;
+        in vec2 ourTextureCoordinates;
 
         uniform vec3 additionalColor;
+        uniform sampler2D ourTexture;
         void main()
         {
-            FragColor = vec4(vec3(dot(ourColor + additionalColor, vec3(.5, .5, .5))), 1.0f);
+            FragColor = texture(ourTexture, ourTextureCoordinates) * vec4(vec3(dot(ourColor + additionalColor, vec3(.5, .5, .5))), 1.0f);
         }
     ";
 
@@ -61,17 +67,16 @@ public class GraphicsContext : IDisposable
     {
         Graphics ??= Window.CreateOpenGL();
         Graphics.Enable(GLEnum.LineSmooth);
-    }
-
-    public virtual void GraphicsBeginFrameRender()
-    {
-        Graphics.DepthFunc(DepthFunction.Lequal);
         Graphics.Enable(
             GLEnum.DepthTest |
             GLEnum.Blend |
             GLEnum.CullFace
             );
         Graphics.FrontFace(FrontFaceDirection.Ccw); //Counter clock wise.
+    }
+
+    public virtual void GraphicsBeginFrameRender()
+    {
         Clear(
             InlineValueParameter_Three<ClearBufferMask>.CreateInstance(
                 ClearBufferMask.ColorBufferBit,

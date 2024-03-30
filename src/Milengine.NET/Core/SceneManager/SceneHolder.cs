@@ -79,6 +79,7 @@ public class SceneHolder : IDisposable
             Matrix4X4<float> currentCameraView = CurrentCamera.CalculateCameraView();
             GraphicsContext.Graphics.UniformMatrix4(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "uView"),
                 1, false, (float*)&currentCameraView);
+            GraphicsContext.Graphics.Uniform1(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "ourTexture"), 0);
             ExecuteObjectsAction((IRenderableObject currentObject) =>
             {
                 if(!currentObject.Equals(SceneCameras.Span[MainCameraIndex]))

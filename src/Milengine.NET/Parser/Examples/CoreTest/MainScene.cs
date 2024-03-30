@@ -1,4 +1,3 @@
-using System.Numerics;
 using Milengine.NET.Core;
 using Milengine.NET.Core.Cameras;
 using Milengine.NET.Core.Graphics;
@@ -22,6 +21,7 @@ public sealed class MainScene : SceneHolder
     private Vector2D<float> lastMousePosition = Vector2D<float>.Zero;
 
     private float cameraVelocity = 25.0f;
+    private bool isMouseEnable = false;
 
     public bool InputCurrentStatePress { get; private set; } = false;
 
@@ -48,9 +48,12 @@ public sealed class MainScene : SceneHolder
 
         var objectModel = new ObjFormat();
         RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj")));
-        RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Char1.obj")));
+            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj"))
+            {
+                TextureTemporaryHolder = new Core.Texture("/Users/mates/Downloads/RETRO_TEXTURE_PACK_SAMPLE/SAMPLE/BRICK_1A.png", GLEnum.Texture2D)
+            });
+        //RenderableObjects.Add(
+        //    new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Char1.obj")));
         base.ExecuteObjectsInitialization();
     }
 
@@ -81,16 +84,28 @@ public sealed class MainScene : SceneHolder
             if(keyboard.IsKeyPressed(Key.ShiftLeft))
                 viewCamera.Position -= Vector3D<float>.UnitY * cameraVelocity * (float)deltaTime;
 
-            Vector2D<float> mousePosition = new Vector2D<float>(mouse.Position.X, mouse.Position.Y);
+            Vector2D<float> mousePosition = !isMouseEnable ? new Vector2D<float>(mouse.Position.X, mouse.Position.Y) : lastMousePosition;
             viewCamera.CalculateMouseViewDirections(mousePosition, lastMousePosition);
             lastMousePosition = mousePosition;
         }
-        if(keyboard.IsKeyPressed(Key.E))
+        keyboard.KeyUp += (IKeyboard keyboard, Key key, int value) =>
         {
-            int cameraCount = SceneCameras.Span.Length;
-            MainCameraIndex = (MainCameraIndex + 1) % cameraCount;
-        }
-        RenderableObjects[3].Rotation = Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitY, 0.5f * (float)Window.Time);
+            if(key == Key.Escape)
+            {
+                unsafe{
+                    WindowHandle* currentWindowHandle = GlfwWindowing.GetHandle(GraphicsContext.Global.Window);
+                    CursorModeValue relativeCursorModeValue = isMouseEnable ? CursorModeValue.CursorDisabled : CursorModeValue.CursorNormal;
+                    GraphicsContext.Global.WindowGlfw.SetInputMode(currentWindowHandle,
+                        CursorStateAttribute.Cursor,
+                        relativeCursorModeValue
+                    );
+                }
+                isMouseEnable = !isMouseEnable;
+            }
+            if(key == Key.E)
+                MainCameraIndex = (MainCameraIndex + 1) % SceneCameras.Length;
+        };
+        //RenderableObjects[3].Rotation = Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitY, 0.5f * (float)Window.Time);
     }
 
     public override void ExecuteObjectsRender(double deltaTime)
