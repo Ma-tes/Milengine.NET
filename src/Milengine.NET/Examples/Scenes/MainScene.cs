@@ -12,7 +12,7 @@ using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using Silk.NET.Windowing.Glfw;
 
-namespace Milengine.NET.Examples.CoreTest;
+namespace Milengine.NET.Examples;
 
 public sealed class MainScene : SceneHolder
 {
@@ -48,12 +48,9 @@ public sealed class MainScene : SceneHolder
 
         var objectModel = new ObjFormat();
         RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj"))
-            {
-                TextureTemporaryHolder = new Core.Texture("/Users/mates/Downloads/RETRO_TEXTURE_PACK_SAMPLE/SAMPLE/BRICK_1A.png", GLEnum.Texture2D)
-            });
-        //RenderableObjects.Add(
-        //    new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Char1.obj")));
+            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj")));
+        RenderableObjects.Add(
+            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Char1.obj")));
         base.ExecuteObjectsInitialization();
     }
 
@@ -105,7 +102,8 @@ public sealed class MainScene : SceneHolder
             if(key == Key.E)
                 MainCameraIndex = (MainCameraIndex + 1) % SceneCameras.Length;
         };
-        //RenderableObjects[3].Rotation = Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitY, 0.5f * (float)Window.Time);
+        RenderableObjects[3].Rotation = Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitY, 0.5f * (float)Window.Time);
+        Window.Title = Window.FramesPerSecond.ToString();
     }
 
     public override void ExecuteObjectsRender(double deltaTime)

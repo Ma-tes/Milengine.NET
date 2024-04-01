@@ -1,0 +1,24 @@
+﻿using Milengine.NET.Core.Graphics;
+using Milengine.NET.Examples.CoreTest;
+using Silk.NET.Maths;
+using Silk.NET.Windowing;
+
+namespace Milengine.NET;
+public class Program
+{
+    private static WindowOptions windowOptions = WindowOptions.Default with
+    {
+        Size = new Vector2D<int>(1024, 720),
+        Title = "Window test",
+    };
+
+    private static MainScene testScene;
+
+    public static void Main()
+    {
+        testScene = new MainScene(Window.Create(windowOptions), null);
+        testScene.Initializate();
+        GraphicsContext.Global = new GraphicsContext(testScene.Window);
+        testScene.Window.Run();
+    }
+}

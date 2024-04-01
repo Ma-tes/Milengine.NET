@@ -1,3 +1,4 @@
+using Milengine.NET.Core.Material;
 using Milengine.NET.Core.Utilities.InlineOptimalizations.Buffers.InlineParameterBuffer;
 using Silk.NET.GLFW;
 using Silk.NET.Maths;
@@ -53,6 +54,8 @@ public class GraphicsContext : IDisposable
 
     public PolygonMode CurrentRenderingType { get; set; } =
         PolygonMode.Fill;
+    public TextureMapper TextureMapper { get; set; } = null!;
+
     public static GraphicsContext Global { get; internal set; } = null!;
 
     public GraphicsContext(IWindow window)
