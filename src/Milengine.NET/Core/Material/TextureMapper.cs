@@ -80,8 +80,18 @@ public sealed class TextureMapper : IGraphicsBindable
 
     //private IEnumerable<Texture> SeparateTextureMap()
 
-    private Memory<Rgba32> GetImageDataSet(Image<Rgba32> image) =>
-        image.GetPixelMemoryGroup()[0];
+    private Memory<Rgba32> GetImageDataSet(Image<Rgba32> image)
+    {
+        var imagePixelBuffer = image.GetPixelMemoryGroup();
+        Memory<Rgba32> returnBuffer = new Rgba32[imagePixelBuffer.TotalLength];
+        Span<Rgba32> returnBufferSpan = returnBuffer.Span;
+        for (int i = 0; i < imagePixelBuffer.BufferLength; i++)
+        {
+            Span<Rgba32> currentPixelBuffer = imagePixelBuffer[i].Span;
+        }
+    }
+
+    private Memory<>
 
     public void Dispose()
     {

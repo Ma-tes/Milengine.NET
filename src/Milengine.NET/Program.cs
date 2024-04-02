@@ -1,10 +1,8 @@
 ﻿using Milengine.NET.Core.Cameras;
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Interfaces;
-using Milengine.NET.Core.Material;
 using Milengine.NET.Examples;
 using Silk.NET.Maths;
-using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using Silk.NET.Windowing.Glfw;
 
@@ -19,12 +17,6 @@ public class Program
 
     public static void Main()
     {
-        TextureMapper currentTextureMapper = new TextureMapper(
-            @"/Users/mates/Downloads/TextingTextureMap.png",
-            GLEnum.Texture2D,
-            new Vector2D<int>(64, 64)
-        );
-
         GlfwWindowing.RegisterPlatform();
         GlfwWindowing.Use();
 
