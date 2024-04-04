@@ -29,7 +29,7 @@ public class Model : IRenderableObject
     {
         int meshesLength = Meshes.Length;
         var meshesSpan = Meshes.Span;
-        TextureTemporaryHolder.LoadUnsafeTexture();
+        GraphicsContext.Global.TextureMapper.Bind();
         for (int i = 0; i < meshesLength; i++) { meshesSpan[i].LoadMesh(); }
     }
 
@@ -47,6 +47,7 @@ public class Model : IRenderableObject
         for (int i = 0; i < meshesLength; i++)
         {
             Meshes.Span[i].VertexArrayBuffer.Bind(); 
+            TextureTemporaryHolder.LoadUnsafeTexture();
             TextureTemporaryHolder.Bind();
             unsafe { GraphicsContext.Graphics.DrawArrays(GLEnum.Triangles, 0, (uint)Meshes.Span[i].Indices.Buffer.Length / sizeof(ushort)); }
         }

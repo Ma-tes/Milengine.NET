@@ -33,21 +33,29 @@ public struct Texture : IGraphicsBindable
     {
         Identificator = identificator;
         Position = position;
+        RenderParameters.Push(
+            new TextureRenderParameter(GLEnum.TextureWrapS, (float)GLEnum.Repeat)
+        );
+        RenderParameters.Push(
+            new TextureRenderParameter(GLEnum.TextureWrapT, (float)GLEnum.Repeat)
+        );
     }
 
     public unsafe void LoadUnsafeTexture()
     {
         var textureMapper = GraphicsContext.Global.TextureMapper;
-        ReadOnlySpan<Rgba32> textureMapData = textureMapper.TextureMapData.Span;
+        var textureMapData = textureMapper.TextureMapData2D;
 
-        GraphicsContext.Graphics.TexSubImage2D(textureMapper.TextureType, 0, Position.X,
-            Position.Y, (uint)textureMapper.TextureMapSize.X, (uint)textureMapper.TextureMapSize.Y, GLEnum.Rgba, GLEnum.UnsignedByte,
-                textureMapData);
+        GraphicsContext.Graphics.TexImage2D<Rgba32>(textureMapper.TextureType, 0, InternalFormat.Rgba8,
+            64, 64, 0, GLEnum.Rgba, GLEnum.UnsignedByte,
+                textureMapData[0]);
 
         while(RenderParameters.TryPop(out TextureRenderParameter parameter))
         {
             GraphicsContext.Graphics.TexParameter(textureMapper.TextureType, parameter.Name, parameter.Value);
         }
+        GraphicsContext.Graphics.TexParameter(textureMapper.TextureType, GLEnum.TextureWrapS, (uint)GLEnum.Repeat);
+        GraphicsContext.Graphics.TexParameter(textureMapper.TextureType, GLEnum.TextureWrapT, (uint)GLEnum.Repeat);
         GraphicsContext.Graphics.GenerateMipmap(textureMapper.TextureType);
     }
 

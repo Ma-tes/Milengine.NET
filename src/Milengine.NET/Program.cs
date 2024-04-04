@@ -1,8 +1,10 @@
 ﻿using Milengine.NET.Core.Cameras;
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Interfaces;
+using Milengine.NET.Core.Material;
 using Milengine.NET.Examples;
 using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using Silk.NET.Windowing.Glfw;
 

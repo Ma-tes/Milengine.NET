@@ -1,11 +1,9 @@
-using System.Runtime.InteropServices;
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Graphics.Interfaces;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
-using SixLabors.ImageSharp.ColorSpaces;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace Milengine.NET.Core.Material;
@@ -50,9 +48,11 @@ public sealed class TextureMapper : IGraphicsBindable
 
     public Vector2D<int> TextureMapSize { get; }
     public ReadOnlyMemory<Rgba32> TextureMapData { get; }
+    public Rgba32[][] TextureMapData2D { get; }
 
     public ReadOnlyMemory<Texture> Textures { get; }
-    public Rgb24 NullableRgb24Color { get; set; } = new Rgb24(251, 0, 255);
+
+    public static readonly Rgba32 NullableRgb32Color = new(251, 0, 255);
 
     public TextureMapper(string path, GLEnum textureType, Vector2D<int> textureMapSize)
     {
@@ -61,8 +61,9 @@ public sealed class TextureMapper : IGraphicsBindable
         TextureMapSize = textureMapSize;
         //TODO: Creates a specific buffer, which is for resolution 2048x1080 separeted
         //into three buffer segments.
-        var currentImageMemoryGroup = ImageTextureInformation.RelativeImage.GetPixelMemoryGroup();
         TextureMapData = GetImageDataSet(ImageTextureInformation.RelativeImage);
+        Textures = SeparateTextureMap([..TextureMapData.Span]).ToArray();
+        TextureMapData2D = CreateTwoDimensionalRgba32Buffer();
     }
 
     public void Bind()
@@ -73,25 +74,70 @@ public sealed class TextureMapper : IGraphicsBindable
         unsafe{
             ImageTextureInformation.SetGraphicsTexture(
                 (ImageDataSet<Rgba32> image) => GraphicsContext.Graphics.TexImage2D(TextureType, 0, InternalFormat.Rgba8,
-                    image.Width, image.Height, 0, GLEnum.Rgba, GLEnum.UnsignedByte, null));
+                    (uint)TextureMapSize.X, (uint)TextureMapSize.Y, 0, GLEnum.Rgba, GLEnum.UnsignedByte, null));
+                    //(uint)ImageTextureInformation.RelativeImage.Width, (uint)ImageTextureInformation.RelativeImage.Height, 0, GLEnum.Rgba, GLEnum.UnsignedByte, null));
         }
         GraphicsContext.Graphics.GenerateMipmap(TextureType);
     }
 
-    //private IEnumerable<Texture> SeparateTextureMap()
+    public Rgba32[][] CreateTwoDimensionalRgba32Buffer()
+    {
+        int imageWidht = ImageTextureInformation.RelativeImage.Width;
+        int imageHeight = ImageTextureInformation.RelativeImage.Height;
 
-    private Memory<Rgba32> GetImageDataSet(Image<Rgba32> image)
+        ReadOnlySpan<Rgba32> mapDataSpan = TextureMapData.Span;
+        Rgba32[][] returnRgba32Buffer = new Rgba32[imageHeight][];
+        for (int i = 0; i < imageHeight; i++)
+        {
+            int dataShiftIndex = i * imageWidht;
+            Rgba32[] currentData = [..mapDataSpan[dataShiftIndex..(dataShiftIndex + imageWidht)]];
+            returnRgba32Buffer[i] = currentData;
+        }
+        return returnRgba32Buffer;
+    }
+
+    private IEnumerable<Texture> SeparateTextureMap(Rgba32[] bufferMap)
+    {
+        int bufferLength = bufferMap.Length;
+        bool isBufferWrap = false;
+ 
+        int relativeYPosition = 0;
+        int textureIndex = 0;
+        while(textureIndex < bufferLength && !isBufferWrap)
+        {
+
+            var currentTexture = new Texture($"Texture::{textureIndex}",
+                new Vector2D<int>(
+                    textureIndex - (relativeYPosition * (int)ImageTextureInformation.Width),
+                    relativeYPosition * (int)ImageTextureInformation.Height
+                ));
+            yield return currentTexture;
+
+            textureIndex += TextureMapSize.X; 
+            if(textureIndex == ImageTextureInformation.Width) relativeYPosition++;
+
+            Rgba32 nextPixelColor = bufferMap[textureIndex + 1];
+            if(nextPixelColor.Rgba == NullableRgb32Color.Rgba)
+                isBufferWrap = true;
+        }
+    }
+
+    private static Memory<Rgba32> GetImageDataSet(Image<Rgba32> image)
     {
         var imagePixelBuffer = image.GetPixelMemoryGroup();
         Memory<Rgba32> returnBuffer = new Rgba32[imagePixelBuffer.TotalLength];
         Span<Rgba32> returnBufferSpan = returnBuffer.Span;
-        for (int i = 0; i < imagePixelBuffer.BufferLength; i++)
+
+        int relativeAllocationLenght = 0;
+        for (int i = 0; i < imagePixelBuffer.Count; i++)
         {
             Span<Rgba32> currentPixelBuffer = imagePixelBuffer[i].Span;
-        }
-    }
+            currentPixelBuffer.CopyTo(returnBufferSpan[relativeAllocationLenght..]);
 
-    private Memory<>
+            relativeAllocationLenght += currentPixelBuffer.Length;
+        }
+        return returnBuffer;
+    }
 
     public void Dispose()
     {

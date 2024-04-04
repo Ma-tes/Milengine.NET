@@ -2,6 +2,7 @@ using Milengine.NET.Core;
 using Milengine.NET.Core.Cameras;
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Interfaces;
+using Milengine.NET.Core.Material;
 using Milengine.NET.Core.SceneManager;
 using Milengine.NET.Core.Structures;
 using Milengine.NET.Parser;
@@ -45,12 +46,26 @@ public sealed class MainScene : SceneHolder
                 CursorModeValue.CursorDisabled 
             );
         }
+        GraphicsContext.Global.TextureMapper = new TextureMapper(
+            @"/Users/mates/Downloads/TextingTextureMap.png",
+            GLEnum.Texture2D,
+            new Vector2D<int>(64, 64)
+        );
+
+        GraphicsContext.Global.TextureMapper.Bind();
 
         var objectModel = new ObjFormat();
         RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj")));
+            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj"))
+            {
+                TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[1]
+            });
         RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Char1.obj")));
+            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Char1.obj"))
+            {
+                TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[1]
+            });
+
         base.ExecuteObjectsInitialization();
     }
 
