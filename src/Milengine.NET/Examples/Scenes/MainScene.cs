@@ -51,19 +51,53 @@ public sealed class MainScene : SceneHolder
             GLEnum.Texture2D,
             new Vector2D<int>(64, 64)
         );
+        GraphicsContext.Global.TextureMapper.RenderParameters.Push(
+            new TextureRenderParameter(GLEnum.TextureWrapS, (float)GLEnum.Repeat)
+        );
+        GraphicsContext.Global.TextureMapper.RenderParameters.Push(
+            new TextureRenderParameter(GLEnum.TextureWrapT, (float)GLEnum.Repeat)
+        );
 
         GraphicsContext.Global.TextureMapper.Bind();
 
         var objectModel = new ObjFormat();
-        RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj"))
-            {
-                TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[3]
-            });
+        var currentTextures = GraphicsContext.Global.TextureMapper.Textures.Span;
+
+        int texturesCount = currentTextures.Length;
+        for (int i = 0; i < texturesCount; i++)
+        {
+            Vector3D<float> modelPosition = new Vector3D<float>(20 * i, 0, 0);
+            RenderableObjects.Add(
+                new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj"))
+                {
+                    TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[i],
+                    Position = modelPosition
+                });
+        }
         RenderableObjects.Add(
             new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Char1.obj"))
             {
                 TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[0]
+            });
+        //RenderableObjects.Add(
+        //    new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/mecha.obj"))
+        //    {
+        //        TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[1],
+        //        Position = Vector3D<float>.UnitX * 100.0f
+        //    });
+        RenderableObjects.Add(
+            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/ass_rifle.obj"))
+            {
+                TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[2],
+                Position = Vector3D<float>.UnitX * 20.0f,
+                Scale = 0.02f
+            });
+        RenderableObjects.Add(
+            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/pistol.obj"))
+            {
+                TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[2],
+                Position = Vector3D<float>.UnitX * 40.0f,
+                Scale = 0.2f
             });
 
         base.ExecuteObjectsInitialization();
@@ -117,8 +151,19 @@ public sealed class MainScene : SceneHolder
             if(key == Key.E)
                 MainCameraIndex = (MainCameraIndex + 1) % SceneCameras.Length;
         };
-        RenderableObjects[3].Rotation = Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitY, 0.5f * (float)Window.Time);
+
+        int objectsCount = RenderableObjects.Count;
+        RenderableObjects[objectsCount - 2].Rotation = Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitY, 1.0f * (float)Window.Time)
+            * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitX, 1.0f * (float)Window.Time)
+            * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitZ, 1.0f * (float)Window.Time);
+        RenderableObjects[objectsCount - 2].Position += MathF.Sin((float)Window.Time * 5) * (Vector3D<float>.UnitY * 0.5f);
+
+        RenderableObjects[objectsCount - 1].Rotation = Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitY, 1.0f * (float)Window.Time)
+            * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitX, 1.0f * (float)Window.Time)
+            * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitZ, 1.0f * (float)Window.Time);
+        RenderableObjects[objectsCount - 1].Position += MathF.Sin((float)Window.Time * 5) * (Vector3D<float>.UnitY * 0.5f);
         Window.Title = Window.FramesPerSecond.ToString();
+        Console.WriteLine(CurrentFrameTick.CalculateRelativeFramesPerSecond());
     }
 
     public override void ExecuteObjectsRender(double deltaTime)

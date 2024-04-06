@@ -60,8 +60,6 @@ public sealed class TextureMapper : IGraphicsBindable
         ImageTextureInformation = new ImageDataSet<Rgba32>(path);
         TextureType = textureType;
         TextureMapSize = textureMapSize;
-        //TODO: Creates a specific buffer, which is for resolution 2048x1080 separeted
-        //into three buffer segments.
         TextureMapData = GetImageDataSet(ImageTextureInformation.RelativeImage);
         Textures = SeparateTextureMap([..TextureMapData.Span]).ToArray();
         RelativeTextureMapData = CreateRelativeTextureDataSet(TextureMapData.Span);
@@ -75,7 +73,6 @@ public sealed class TextureMapper : IGraphicsBindable
         unsafe{
             ImageTextureInformation.SetGraphicsTexture(
                 (ImageDataSet<Rgba32> image) => GraphicsContext.Graphics.TexImage2D(TextureType, 0, InternalFormat.Rgba8,
-                    //(uint)ImageTextureInformation.RelativeImage.Width, (uint)ImageTextureInformation.RelativeImage.Height, 0, GLEnum.Rgba, GLEnum.UnsignedByte,
                     (uint)TextureMapSize.X, (uint)TextureMapSize.Y, 0, GLEnum.Rgba, GLEnum.UnsignedByte,
                         RelativeTextureMapData.Span));
         }

@@ -28,12 +28,12 @@ public sealed class ViewCamera : ICamera, IRenderableObject
     public bool IsRenderable { get; } = true;
 
     public CameraConfiguration CameraConfiguration { get; set; } = new(
-        fieldOfView: 60.0f,
+        fieldOfView: 90.0f,
         zoom: 1.0f,
         //Pixels per second
         sensivity: 1.0f,
         clippingPlaneNear: 2f,
-        clippingPlaneFar: 100f,
+        clippingPlaneFar: 500f,
         InlineValueParameter_Three<DirectionValue>.CreateInstance(
             new DirectionValue(Direction.Up, new(0.0f, 1.0f, 0.0f)),
             new DirectionValue(Direction.Right, new(1.0f, 0.0f, 0.0f)),
@@ -72,7 +72,6 @@ public sealed class ViewCamera : ICamera, IRenderableObject
         );
         return currentView;
     }
-
 
     public void CalculateMouseViewDirections(Vector2D<float> mousePosition, Vector2D<float> lastMousePosition)
     {

@@ -33,12 +33,6 @@ public struct Texture : IGraphicsBindable
     {
         Identificator = identificator;
         Position = position;
-        RenderParameters.Push(
-            new TextureRenderParameter(GLEnum.TextureWrapS, (float)GLEnum.Repeat)
-        );
-        RenderParameters.Push(
-            new TextureRenderParameter(GLEnum.TextureWrapT, (float)GLEnum.Repeat)
-        );
     }
 
     public unsafe void LoadUnsafeTexture()
@@ -64,11 +58,8 @@ public struct Texture : IGraphicsBindable
 
         while(RenderParameters.TryPop(out TextureRenderParameter parameter))
         {
-            //GraphicsContext.Graphics.TexParameter(textureMapper.TextureType, parameter.Name, parameter.Value);
+            GraphicsContext.Graphics.TexParameter(textureMapper.TextureType, parameter.Name, parameter.Value);
         }
-        //GraphicsContext.Graphics.TexParameter(textureMapper.TextureType, GLEnum.TextureWrapS, (uint)GLEnum.Repeat);
-        //GraphicsContext.Graphics.TexParameter(textureMapper.TextureType, GLEnum.TextureWrapT, (uint)GLEnum.Repeat);
-        //GraphicsContext.Graphics.TexParameter(textureMapper.TextureType, GLEnum.TextureWrapR, (uint)GLEnum.Repeat);
         GraphicsContext.Graphics.GenerateMipmap(textureMapper.TextureType);
     }
 

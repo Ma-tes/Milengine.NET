@@ -29,7 +29,7 @@ public class SceneHolder : IDisposable
     public SceneHolder(IWindow window, Memory<ICamera> sceneCameras)
     {
         SceneCameras = sceneCameras;
-        CurrentFrameTick = new TickCounter();
+        CurrentFrameTick = new TickCounter(1);
         Window = window;
         RenderableObjects.AddRange(GetRelativeRenderableCameras(sceneCameras.Span.ToArray()));
     }
