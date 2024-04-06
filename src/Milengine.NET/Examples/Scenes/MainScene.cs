@@ -58,12 +58,12 @@ public sealed class MainScene : SceneHolder
         RenderableObjects.Add(
             new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj"))
             {
-                TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[1]
+                TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[3]
             });
         RenderableObjects.Add(
             new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Char1.obj"))
             {
-                TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[1]
+                TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[0]
             });
 
         base.ExecuteObjectsInitialization();

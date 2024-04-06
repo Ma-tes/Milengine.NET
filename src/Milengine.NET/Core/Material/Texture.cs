@@ -44,18 +44,31 @@ public struct Texture : IGraphicsBindable
     public unsafe void LoadUnsafeTexture()
     {
         var textureMapper = GraphicsContext.Global.TextureMapper;
-        var textureMapData = textureMapper.TextureMapData2D;
+        var textureMapData = textureMapper.RelativeTextureMapData.Span;
 
-        GraphicsContext.Graphics.TexImage2D<Rgba32>(textureMapper.TextureType, 0, InternalFormat.Rgba8,
-            64, 64, 0, GLEnum.Rgba, GLEnum.UnsignedByte,
-                textureMapData[0]);
+        int textureWidth = textureMapper.TextureMapSize.X;
+        int textureHeight = textureMapper.TextureMapSize.Y;
+        for (int i = 0; i < textureHeight; i++)
+        {
+            int relativePositionX = Position.X / textureWidth
+                * textureWidth * textureHeight + (textureWidth * i);
+            GraphicsContext.Graphics.TexSubImage2D(
+                textureMapper.TextureType, 0,
+                0,
+                i,
+                (uint)textureWidth, 1,
+                GLEnum.Rgba,
+                GLEnum.UnsignedByte,
+                textureMapData[relativePositionX..(relativePositionX + textureWidth)]);
+        }
 
         while(RenderParameters.TryPop(out TextureRenderParameter parameter))
         {
-            GraphicsContext.Graphics.TexParameter(textureMapper.TextureType, parameter.Name, parameter.Value);
+            //GraphicsContext.Graphics.TexParameter(textureMapper.TextureType, parameter.Name, parameter.Value);
         }
-        GraphicsContext.Graphics.TexParameter(textureMapper.TextureType, GLEnum.TextureWrapS, (uint)GLEnum.Repeat);
-        GraphicsContext.Graphics.TexParameter(textureMapper.TextureType, GLEnum.TextureWrapT, (uint)GLEnum.Repeat);
+        //GraphicsContext.Graphics.TexParameter(textureMapper.TextureType, GLEnum.TextureWrapS, (uint)GLEnum.Repeat);
+        //GraphicsContext.Graphics.TexParameter(textureMapper.TextureType, GLEnum.TextureWrapT, (uint)GLEnum.Repeat);
+        //GraphicsContext.Graphics.TexParameter(textureMapper.TextureType, GLEnum.TextureWrapR, (uint)GLEnum.Repeat);
         GraphicsContext.Graphics.GenerateMipmap(textureMapper.TextureType);
     }
 

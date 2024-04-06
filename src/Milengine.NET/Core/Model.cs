@@ -29,7 +29,7 @@ public class Model : IRenderableObject
     {
         int meshesLength = Meshes.Length;
         var meshesSpan = Meshes.Span;
-        GraphicsContext.Global.TextureMapper.Bind();
+        //GraphicsContext.Global.TextureMapper.Bind();
         for (int i = 0; i < meshesLength; i++) { meshesSpan[i].LoadMesh(); }
     }
 

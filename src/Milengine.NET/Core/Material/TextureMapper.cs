@@ -47,8 +47,9 @@ public sealed class TextureMapper : IGraphicsBindable
     public GLEnum TextureType { get; }
 
     public Vector2D<int> TextureMapSize { get; }
+
     public ReadOnlyMemory<Rgba32> TextureMapData { get; }
-    public Rgba32[][] TextureMapData2D { get; }
+    public ReadOnlyMemory<Rgba32> RelativeTextureMapData { get; }
 
     public ReadOnlyMemory<Texture> Textures { get; }
 
@@ -63,7 +64,7 @@ public sealed class TextureMapper : IGraphicsBindable
         //into three buffer segments.
         TextureMapData = GetImageDataSet(ImageTextureInformation.RelativeImage);
         Textures = SeparateTextureMap([..TextureMapData.Span]).ToArray();
-        TextureMapData2D = CreateTwoDimensionalRgba32Buffer();
+        RelativeTextureMapData = CreateRelativeTextureDataSet(TextureMapData.Span);
     }
 
     public void Bind()
@@ -74,26 +75,11 @@ public sealed class TextureMapper : IGraphicsBindable
         unsafe{
             ImageTextureInformation.SetGraphicsTexture(
                 (ImageDataSet<Rgba32> image) => GraphicsContext.Graphics.TexImage2D(TextureType, 0, InternalFormat.Rgba8,
-                    (uint)TextureMapSize.X, (uint)TextureMapSize.Y, 0, GLEnum.Rgba, GLEnum.UnsignedByte, null));
-                    //(uint)ImageTextureInformation.RelativeImage.Width, (uint)ImageTextureInformation.RelativeImage.Height, 0, GLEnum.Rgba, GLEnum.UnsignedByte, null));
+                    //(uint)ImageTextureInformation.RelativeImage.Width, (uint)ImageTextureInformation.RelativeImage.Height, 0, GLEnum.Rgba, GLEnum.UnsignedByte,
+                    (uint)TextureMapSize.X, (uint)TextureMapSize.Y, 0, GLEnum.Rgba, GLEnum.UnsignedByte,
+                        RelativeTextureMapData.Span));
         }
         GraphicsContext.Graphics.GenerateMipmap(TextureType);
-    }
-
-    public Rgba32[][] CreateTwoDimensionalRgba32Buffer()
-    {
-        int imageWidht = ImageTextureInformation.RelativeImage.Width;
-        int imageHeight = ImageTextureInformation.RelativeImage.Height;
-
-        ReadOnlySpan<Rgba32> mapDataSpan = TextureMapData.Span;
-        Rgba32[][] returnRgba32Buffer = new Rgba32[imageHeight][];
-        for (int i = 0; i < imageHeight; i++)
-        {
-            int dataShiftIndex = i * imageWidht;
-            Rgba32[] currentData = [..mapDataSpan[dataShiftIndex..(dataShiftIndex + imageWidht)]];
-            returnRgba32Buffer[i] = currentData;
-        }
-        return returnRgba32Buffer;
     }
 
     private IEnumerable<Texture> SeparateTextureMap(Rgba32[] bufferMap)
@@ -120,6 +106,33 @@ public sealed class TextureMapper : IGraphicsBindable
             if(nextPixelColor.Rgba == NullableRgb32Color.Rgba)
                 isBufferWrap = true;
         }
+    }
+
+    public Memory<Rgba32> CreateRelativeTextureDataSet(ReadOnlySpan<Rgba32> data)
+    {
+        int dataLength = data.Length;
+        Memory<Rgba32> textureDataSet = new Rgba32[dataLength];
+        Span<Rgba32> textureDataSetSpan = textureDataSet.Span;
+
+        int textureWidth = TextureMapSize.X;
+        int textureHeight = TextureMapSize.Y;
+
+        int currentYPosition = 0;
+        int textureCount = 0;
+        while(currentYPosition < ImageTextureInformation.Height)
+        {
+            int relativeXPosition = textureCount * textureWidth;
+            for (int i = 0; i < textureHeight; i++)
+            {
+                int currentDataIndex = (i * textureWidth) + (textureCount * (textureWidth * textureHeight));
+                int currentRowDataSetIndex = relativeXPosition + ((int)ImageTextureInformation.Width * i);
+                data[currentRowDataSetIndex..(currentRowDataSetIndex + textureWidth)].CopyTo(textureDataSetSpan[currentDataIndex..]);
+            }
+            int currentBufferWidthDifference = relativeXPosition - ((int)ImageTextureInformation.Width * currentYPosition);
+            if(currentBufferWidthDifference == ImageTextureInformation.Width) currentYPosition += (int)ImageTextureInformation.Height;
+            textureCount++;
+        }
+        return textureDataSet;
     }
 
     private static Memory<Rgba32> GetImageDataSet(Image<Rgba32> image)
