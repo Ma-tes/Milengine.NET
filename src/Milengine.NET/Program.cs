@@ -28,7 +28,7 @@ public class Program
         ]));
         GraphicsContext.Global = new GraphicsContext(testScene.Window)
         {
-            RelativeResolution = new Vector2D<uint>(1200, 600)
+            RelativeResolution = new Vector2D<uint>(480, 240)
         };
 
         testScene.Initializate();

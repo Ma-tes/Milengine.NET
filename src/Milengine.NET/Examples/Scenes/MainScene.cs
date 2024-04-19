@@ -79,12 +79,6 @@ public sealed class MainScene : SceneHolder
             {
                 TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[0]
             });
-        //RenderableObjects.Add(
-        //    new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/mecha.obj"))
-        //    {
-        //        TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[1],
-        //        Position = Vector3D<float>.UnitX * 100.0f
-        //    });
         RenderableObjects.Add(
             new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/ass_rifle.obj"))
             {
@@ -98,6 +92,12 @@ public sealed class MainScene : SceneHolder
                 TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[2],
                 Position = Vector3D<float>.UnitX * 40.0f,
                 Scale = 0.2f
+            });
+        RenderableObjects.Add(
+            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/mecha.obj"))
+            {
+                TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[1],
+                Position = Vector3D<float>.UnitX * 100.0f
             });
 
         base.ExecuteObjectsInitialization();
@@ -130,6 +130,14 @@ public sealed class MainScene : SceneHolder
             if(keyboard.IsKeyPressed(Key.ShiftLeft))
                 viewCamera.Position -= Vector3D<float>.UnitY * cameraVelocity * (float)deltaTime;
 
+            if(keyboard.IsKeyPressed(Key.ShiftLeft))
+                viewCamera.Position -= Vector3D<float>.UnitY * cameraVelocity * (float)deltaTime;
+
+            if(keyboard.IsKeyPressed(Key.O))
+                viewCamera.CameraConfiguration.FieldOfView = CalculateRelativeFieldOfView(viewCamera.CameraConfiguration.FieldOfView + 0.25f);
+            if(keyboard.IsKeyPressed(Key.P))
+                viewCamera.CameraConfiguration.FieldOfView = CalculateRelativeFieldOfView(viewCamera.CameraConfiguration.FieldOfView - 0.25f);
+
             Vector2D<float> mousePosition = !isMouseEnable ? new Vector2D<float>(mouse.Position.X, mouse.Position.Y) : lastMousePosition;
             viewCamera.CalculateMouseViewDirections(mousePosition, lastMousePosition);
             lastMousePosition = mousePosition;
@@ -149,19 +157,19 @@ public sealed class MainScene : SceneHolder
                 isMouseEnable = !isMouseEnable;
             }
             if(key == Key.E)
-                MainCameraIndex = (MainCameraIndex + 1) % SceneCameras.Length;
+                SceneCameraMapper.MapIndex = (SceneCameraMapper.MapIndex + 1) % SceneCameraMapper.Values.Length;
         };
 
         int objectsCount = RenderableObjects.Count;
+        RenderableObjects[objectsCount - 3].Rotation = Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitY, 1.0f * (float)Window.Time)
+            * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitX, 1.0f * (float)Window.Time)
+            * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitZ, 1.0f * (float)Window.Time);
+        RenderableObjects[objectsCount - 3].Position += MathF.Sin((float)Window.Time * 5) * (Vector3D<float>.UnitY * 0.5f);
+
         RenderableObjects[objectsCount - 2].Rotation = Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitY, 1.0f * (float)Window.Time)
             * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitX, 1.0f * (float)Window.Time)
             * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitZ, 1.0f * (float)Window.Time);
         RenderableObjects[objectsCount - 2].Position += MathF.Sin((float)Window.Time * 5) * (Vector3D<float>.UnitY * 0.5f);
-
-        RenderableObjects[objectsCount - 1].Rotation = Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitY, 1.0f * (float)Window.Time)
-            * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitX, 1.0f * (float)Window.Time)
-            * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitZ, 1.0f * (float)Window.Time);
-        RenderableObjects[objectsCount - 1].Position += MathF.Sin((float)Window.Time * 5) * (Vector3D<float>.UnitY * 0.5f);
         Window.Title = Window.FramesPerSecond.ToString();
         Console.WriteLine(CurrentFrameTick.CalculateRelativeFramesPerSecond());
     }
@@ -177,4 +185,7 @@ public sealed class MainScene : SceneHolder
             GLEnum.Nearest
         );
     }
+
+    private float CalculateRelativeFieldOfView(float currentValue) =>
+        Math.Clamp(currentValue, 0.1f,  179.9f);
 }

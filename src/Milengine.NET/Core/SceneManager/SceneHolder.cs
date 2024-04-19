@@ -1,5 +1,6 @@
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Interfaces;
+using Milengine.NET.Core.Structures;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
@@ -10,7 +11,7 @@ namespace Milengine.NET.Core.SceneManager;
 public class SceneHolder : IDisposable
 {
     internal CancellationTokenSource CancellationTokenSource { get; set; } = new();
-    internal Memory<ICamera> SceneCameras { get; set; } = new();
+    internal MemoryMapper<ICamera> SceneCameraMapper { get; set; }
 
     public List<IRenderableObject> RenderableObjects { get; internal set; } = new();
 
@@ -19,16 +20,15 @@ public class SceneHolder : IDisposable
     public virtual Action<IRenderableObject>? OnObjectRender { get; set; }
 
     //TODO: Use more specific tag system.
-    public int MainCameraIndex { get; set; } = 0;
-    public ICamera CurrentCamera => SceneCameras.Span[MainCameraIndex];
-
+    public ref ICamera CurrentCamera => ref SceneCameraMapper.GetValueReference();
+ 
     public IWindow Window { get; }
 
     public TickCounter CurrentFrameTick { get; }
 
     public SceneHolder(IWindow window, Memory<ICamera> sceneCameras)
     {
-        SceneCameras = sceneCameras;
+        SceneCameraMapper = new MemoryMapper<ICamera>(sceneCameras);
         CurrentFrameTick = new TickCounter(1);
         Window = window;
         RenderableObjects.AddRange(GetRelativeRenderableCameras(sceneCameras.Span.ToArray()));
@@ -82,7 +82,7 @@ public class SceneHolder : IDisposable
             GraphicsContext.Graphics.Uniform1(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "ourTexture"), 0);
             ExecuteObjectsAction((IRenderableObject currentObject) =>
             {
-                if(!currentObject.Equals(SceneCameras.Span[MainCameraIndex]))
+                if(!currentObject.Equals(CurrentCamera))
                 {
                     GraphicsContext.Graphics.UseProgram(GraphicsContext.Global.ShaderHandle);
                     currentObject.OnRender((float)deltaTime);
@@ -122,5 +122,8 @@ public class SceneHolder : IDisposable
         }
     }
 
-    public void Dispose() { }
+    public void Dispose()
+    {
+        Window.Dispose();
+    }
 }

@@ -23,11 +23,11 @@ public sealed class DirectionValue
     }
 }
 
-public struct CameraConfiguration 
+public sealed class CameraConfiguration 
 {
-    public float FieldOfView { get; }
-    public float Zoom { get; }
-    public float Sensivity { get; }
+    public float FieldOfView { get; set; }
+    public float Zoom { get; set; }
+    public float Sensivity { get; set; }
 
     public float ClippingPlaneNear { get; set; }
     public float ClippingPlaneFar { get; set; }
@@ -45,7 +45,7 @@ public struct CameraConfiguration
         CameraDirections = SpanHelper<DirectionValue>.CreateFixedParameterSpan(ref directions).ToArray();
     }
 
-    public readonly ref DirectionValue GetRelativeDirectionValue(Direction direction)
+    public ref DirectionValue GetRelativeDirectionValue(Direction direction)
     {
         int directionValues = InlineParameter_Three.Length;
         Span<DirectionValue> directionValuesSpan = CameraDirections.Span;

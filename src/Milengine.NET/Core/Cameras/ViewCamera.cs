@@ -77,7 +77,7 @@ public sealed class ViewCamera : ICamera, IRenderableObject
     {
         float relativeXPosition = mousePosition.X - lastMousePosition.X;
         float relativeYPosition = lastMousePosition.Y - mousePosition.Y;
-
+   
         Yaw += relativeXPosition; 
         Pitch = Math.Clamp(Pitch + relativeYPosition, -89.0f, 89.0f);
         CameraConfiguration.GetRelativeDirectionValue(Direction.Front).Value = Vector3D.Normalize(new Vector3D<float>(

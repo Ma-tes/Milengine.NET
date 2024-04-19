@@ -1,5 +1,6 @@
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Graphics.Interfaces;
+using Milengine.NET.Core.Graphics.Structures;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using SixLabors.ImageSharp;
@@ -7,36 +8,6 @@ using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace Milengine.NET.Core.Material;
-
-public readonly struct ImageDataSet<T> : IDisposable
-    where T : unmanaged, IPixel<T>
-{
-    public uint Width { get; }
-    public uint Height { get; }
-
-    public Image<T> RelativeImage { get; }
-    public string Path { get; }
-
-    public ImageDataSet(string path)
-    {
-        RelativeImage = Image.Load<T>(path);
-        Width = (uint)RelativeImage.Width;
-        Height = (uint)RelativeImage.Height;
-        Path = path;
-    }
-
-    public unsafe void SetGraphicsTexture(Action<ImageDataSet<T>> onInitializationGraphicsFunction)
-    {
-        using var image = Image.Load<T>(Path);
-        onInitializationGraphicsFunction(this);
-    }
-
-    public void Dispose()
-    {
-        RelativeImage.Dispose();
-    }
-}
-
 
 public sealed class TextureMapper : IGraphicsBindable
 {
@@ -113,15 +84,17 @@ public sealed class TextureMapper : IGraphicsBindable
 
         int textureWidth = TextureMapSize.X;
         int textureHeight = TextureMapSize.Y;
+        int textureAreaSize = textureWidth * textureHeight;
 
         int currentYPosition = 0;
         int textureCount = 0;
+
         while(currentYPosition < ImageTextureInformation.Height)
         {
             int relativeXPosition = textureCount * textureWidth;
             for (int i = 0; i < textureHeight; i++)
             {
-                int currentDataIndex = (i * textureWidth) + (textureCount * (textureWidth * textureHeight));
+                int currentDataIndex = (i * textureWidth) + (textureCount * textureAreaSize);
                 int currentRowDataSetIndex = relativeXPosition + ((int)ImageTextureInformation.Width * i);
                 data[currentRowDataSetIndex..(currentRowDataSetIndex + textureWidth)].CopyTo(textureDataSetSpan[currentDataIndex..]);
             }

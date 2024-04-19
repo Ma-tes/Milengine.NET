@@ -47,9 +47,7 @@ public struct Texture : IGraphicsBindable
             int relativePositionX = Position.X / textureWidth
                 * textureWidth * textureHeight + (textureWidth * i);
             GraphicsContext.Graphics.TexSubImage2D(
-                textureMapper.TextureType, 0,
-                0,
-                i,
+                textureMapper.TextureType, 0, 0, i,
                 (uint)textureWidth, 1,
                 GLEnum.Rgba,
                 GLEnum.UnsignedByte,
