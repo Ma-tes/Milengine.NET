@@ -2,11 +2,8 @@ using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Graphics.Interfaces;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace Milengine.NET.Core;
-
 
 public readonly struct TextureRenderParameter
 {
@@ -67,5 +64,8 @@ public struct Texture : IGraphicsBindable
         GraphicsContext.Graphics.BindTexture(GraphicsContext.Global.TextureMapper.TextureType, Handle);
     }
 
-    public void Dispose() { }
+    public void Dispose()
+    {
+        GraphicsContext.Graphics.DeleteTexture(Handle);
+    }
 }

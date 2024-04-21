@@ -138,6 +138,11 @@ public sealed class MainScene : SceneHolder
             if(keyboard.IsKeyPressed(Key.P))
                 viewCamera.CameraConfiguration.FieldOfView = CalculateRelativeFieldOfView(viewCamera.CameraConfiguration.FieldOfView - 0.25f);
 
+            if(keyboard.IsKeyPressed(Key.Number1))
+                GraphicsContext.Global.CurrentRenderingType = GLEnum.Triangles;
+            if(keyboard.IsKeyPressed(Key.Number2))
+                GraphicsContext.Global.CurrentRenderingType = GLEnum.LineStrip; 
+
             Vector2D<float> mousePosition = !isMouseEnable ? new Vector2D<float>(mouse.Position.X, mouse.Position.Y) : lastMousePosition;
             viewCamera.CalculateMouseViewDirections(mousePosition, lastMousePosition);
             lastMousePosition = mousePosition;

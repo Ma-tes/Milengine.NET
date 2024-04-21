@@ -19,6 +19,5 @@ public struct VertexArrayBuffer<TVbo, TEbo> : IGraphicsBindable
 
     public void Bind() => GraphicsContext.Graphics.BindVertexArray(Handle);
 
-
     public void Dispose() { GraphicsContext.Graphics.DeleteBuffer(Handle); }
 }

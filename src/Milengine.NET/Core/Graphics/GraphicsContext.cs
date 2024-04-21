@@ -52,8 +52,8 @@ public class GraphicsContext : IDisposable
     public uint ShaderHandle { get; set; }
     public Vector2D<uint> RelativeResolution { get; set; }
 
-    public PolygonMode CurrentRenderingType { get; set; } =
-        PolygonMode.Fill;
+    public GLEnum CurrentRenderingType { get; set; } = GLEnum.Triangles;
+
     public TextureMapper TextureMapper { get; set; } = null!;
 
     public static GraphicsContext Global { get; internal set; } = null!;
@@ -104,5 +104,10 @@ public class GraphicsContext : IDisposable
         Graphics.Clear(bufferMask[0] | bufferMask[1] | bufferMask[2]);
     }
 
-    public void Dispose() { Graphics!.Dispose(); }
+    public void Dispose()
+    {
+        Graphics!.Dispose();
+        Window.Dispose();
+        WindowGlfw.Dispose();
+    }
 }

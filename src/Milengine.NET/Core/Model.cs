@@ -49,7 +49,7 @@ public class Model : IRenderableObject
             Meshes.Span[i].VertexArrayBuffer.Bind(); 
             TextureTemporaryHolder.LoadUnsafeTexture();
             TextureTemporaryHolder.Bind();
-            unsafe { GraphicsContext.Graphics.DrawArrays(GLEnum.Triangles, 0, (uint)Meshes.Span[i].Indices.Buffer.Length / sizeof(ushort)); }
+            unsafe { GraphicsContext.Graphics.DrawArrays(GraphicsContext.Global.CurrentRenderingType, 0, (uint)Meshes.Span[i].Indices.Buffer.Length / sizeof(ushort)); }
         }
     }
 }

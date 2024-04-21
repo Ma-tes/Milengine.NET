@@ -12,6 +12,7 @@ public class SceneHolder : IDisposable
 {
     internal CancellationTokenSource CancellationTokenSource { get; set; } = new();
     internal MemoryMapper<ICamera> SceneCameraMapper { get; set; }
+    internal ShaderAttacher Shader { get; set; }
 
     public List<IRenderableObject> RenderableObjects { get; internal set; } = new();
 
@@ -43,14 +44,8 @@ public class SceneHolder : IDisposable
 
     public virtual void ExecuteObjectsInitialization()
     {
-        uint vertexShader = CreateRelativeShader(GraphicsContext.VertexShader, ShaderType.VertexShader);
-        uint fragmentShader = CreateRelativeShader(GraphicsContext.FragmentShader, ShaderType.FragmentShader);
-
-        //TODO: Add the dispose of relative shaders.
-        GraphicsContext.Global.ShaderHandle = GraphicsContext.Graphics.CreateProgram();
-        GraphicsContext.Graphics.AttachShader(GraphicsContext.Global.ShaderHandle, vertexShader);
-        GraphicsContext.Graphics.AttachShader(GraphicsContext.Global.ShaderHandle, fragmentShader);
-        GraphicsContext.Graphics.LinkProgram(GraphicsContext.Global.ShaderHandle);
+        Shader = new ShaderAttacher(GraphicsContext.VertexShader, GraphicsContext.FragmentShader);
+        Shader.AttachShaders();
 
         ExecuteObjectsAction((IRenderableObject currentObject) =>
             currentObject.OnInitialization(), OnObjectInitialization);
@@ -104,14 +99,6 @@ public class SceneHolder : IDisposable
         }
     }
 
-    private static uint CreateRelativeShader(string shaderData, ShaderType shaderType)
-    {
-        uint shaderHandle = GraphicsContext.Graphics.CreateShader(shaderType);
-        GraphicsContext.Graphics.ShaderSource(shaderHandle, shaderData);
-        GraphicsContext.Graphics.CompileShader(shaderHandle);
-        return shaderHandle;
-    }
-
     private static IEnumerable<IRenderableObject> GetRelativeRenderableCameras(ICamera[] cameras)
     {
         int camerasLenght = cameras.Length;
@@ -125,5 +112,6 @@ public class SceneHolder : IDisposable
     public void Dispose()
     {
         Window.Dispose();
+        Shader.DeattachShaders();
     }
 }

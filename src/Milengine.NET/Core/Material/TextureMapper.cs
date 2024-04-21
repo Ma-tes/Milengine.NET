@@ -67,7 +67,7 @@ public sealed class TextureMapper : IGraphicsBindable
                 ));
             yield return currentTexture;
 
-            textureIndex += TextureMapSize.X; 
+            textureIndex += TextureMapSize.X;
             if(textureIndex == ImageTextureInformation.Width) relativeYPosition++;
 
             Rgba32 nextPixelColor = bufferMap[textureIndex + 1];
@@ -125,5 +125,6 @@ public sealed class TextureMapper : IGraphicsBindable
     public void Dispose()
     {
         GraphicsContext.Graphics.DeleteTexture(Handle);
+        ImageTextureInformation.Dispose();
     }
 }
