@@ -6,13 +6,13 @@ public struct VertexArrayBuffer<TVbo, TEbo> : IGraphicsBindable
     where TVbo : unmanaged
     where TEbo : unmanaged
 {
-    public uint Handle { get; } = GraphicsContext.Graphics.GenVertexArray();
+    public uint Handle { get; }
 
     public VertexArrayBuffer(
         GraphicsBufferData<TVbo> vertexBuffer,
         GraphicsBufferData<TEbo> indexBuffer)
     {
-        Bind();
+        Handle = GraphicsContext.Graphics.GenVertexArray(); Bind();
         vertexBuffer.Bind();
         indexBuffer.Bind();
     }

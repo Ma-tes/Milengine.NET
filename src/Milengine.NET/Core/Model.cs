@@ -2,7 +2,6 @@ using System.Numerics;
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Interfaces;
 using Silk.NET.Maths;
-using Silk.NET.OpenGL;
 
 namespace Milengine.NET.Core;
 
@@ -49,7 +48,7 @@ public class Model : IRenderableObject
             Meshes.Span[i].VertexArrayBuffer.Bind(); 
             TextureTemporaryHolder.LoadUnsafeTexture();
             TextureTemporaryHolder.Bind();
-            unsafe { GraphicsContext.Graphics.DrawArrays(GraphicsContext.Global.CurrentRenderingType, 0, (uint)Meshes.Span[i].Indices.Buffer.Length / sizeof(ushort)); }
+            unsafe { GraphicsContext.Graphics.DrawArrays(GraphicsContext.Global.CurrentRenderingType, 0, (uint)Meshes.Span[i].Indices.Buffer.Length / 3); }
         }
     }
 }

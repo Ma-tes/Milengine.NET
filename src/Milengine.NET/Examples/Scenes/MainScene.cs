@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Milengine.NET.Core;
 using Milengine.NET.Core.Cameras;
 using Milengine.NET.Core.Graphics;
@@ -100,6 +101,27 @@ public sealed class MainScene : SceneHolder
                 Position = Vector3D<float>.UnitX * 100.0f
             });
 
+        float planetMaxPosition = 100.0f;
+        int planetCount = 10;
+        for(int i = 0; i < planetCount; i++)
+        {
+            var planetPosition = new Vector3D<float>(
+                (float)Random.Shared.NextDouble() * planetMaxPosition * MathF.Sin((float)Window.Time * 5),
+                (float)Random.Shared.NextDouble() * planetMaxPosition,
+                (float)Random.Shared.NextDouble() * planetMaxPosition  * MathF.Cos((float)Window.Time * 5)
+            );
+
+            int currentTextureIndex = i % texturesCount;
+            RenderableObjects.Add(
+                new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/planeta.obj"))
+                {
+                    TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[currentTextureIndex],
+                    Position = planetPosition,
+                    Scale = 2.0f
+                });
+        }
+
+
         base.ExecuteObjectsInitialization();
     }
 
@@ -166,17 +188,13 @@ public sealed class MainScene : SceneHolder
         };
 
         int objectsCount = RenderableObjects.Count;
-        RenderableObjects[objectsCount - 3].Rotation = Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitY, 1.0f * (float)Window.Time)
+        RenderableObjects[9].Rotation = Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitY, 1.0f * (float)Window.Time)
             * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitX, 1.0f * (float)Window.Time)
             * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitZ, 1.0f * (float)Window.Time);
-        RenderableObjects[objectsCount - 3].Position += MathF.Sin((float)Window.Time * 5) * (Vector3D<float>.UnitY * 0.5f);
-
-        RenderableObjects[objectsCount - 2].Rotation = Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitY, 1.0f * (float)Window.Time)
+        RenderableObjects[10].Rotation = Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitY, 1.0f * (float)Window.Time)
             * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitX, 1.0f * (float)Window.Time)
             * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitZ, 1.0f * (float)Window.Time);
-        RenderableObjects[objectsCount - 2].Position += MathF.Sin((float)Window.Time * 5) * (Vector3D<float>.UnitY * 0.5f);
         Window.Title = Window.FramesPerSecond.ToString();
-        Console.WriteLine(CurrentFrameTick.CalculateRelativeFramesPerSecond());
     }
 
     public override void ExecuteObjectsRender(double deltaTime)
