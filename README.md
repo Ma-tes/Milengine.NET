@@ -20,13 +20,12 @@ Currently every implementation is not going to stay as it is... The only file wh
 ## Archive - Project stage - Fixed(22.04.2024)
 Recently, I have been trying to find and also fix, rendering artefacts, which always appears from the center point of specific collection of meshes.
 
-https://github.com/Ma-tes/Milengine.NET/assets/78597003/86f92b9e-c9ec-4199-bb05-d8f88113dc5f
-
 ### Solution
 Everything happened on this specific line [Model.cs - Line:51](https://github.com/Ma-tes/Milengine.NET/blob/0fe55309226b14ec59c51c25a1fcf98e0e5b38ce/src/Milengine.NET/Core/Model.cs#L51).
 ```cs
 GraphicsContext.Graphics.DrawArrays(GraphicsContext.Global.CurrentRenderingType, 0, (uint)Meshes.Span[i].Indices.Buffer.Length);
 ```
+<img align="right" src="assets/Milengine.NET-2024-04-21.gif" width=450px height=350px>
 
 In a short sentence, this method invokes to OpenGL, which calls to draw multiple combinations of geometric data(Vertex, Normal, Texture coordinate, or color), in a one API call.
 Although, it may sound as a ideal solution, you must provide those geometric data in a certain offset as a one big allocated block of memory. So in some situations, when you are writing your own parser for individual format type, you would be limited, of how you are going to save geometric data.
