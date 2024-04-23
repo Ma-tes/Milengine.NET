@@ -56,7 +56,7 @@ public class GraphicsContext : IDisposable
 
     public TextureMapper TextureMapper { get; set; } = null!;
 
-    public static GraphicsContext Global { get; internal set; } = null!;
+    public static GraphicsContext Global { get; set; } = null!;
 
     public GraphicsContext(IWindow window)
     {
@@ -74,7 +74,7 @@ public class GraphicsContext : IDisposable
             GLEnum.DepthTest |
             GLEnum.Blend |
             GLEnum.CullFace
-            );
+        );
         Graphics.FrontFace(FrontFaceDirection.Ccw); //Counter clock wise.
     }
 
@@ -87,7 +87,7 @@ public class GraphicsContext : IDisposable
                 ClearBufferMask.StencilBufferBit
             )
         );
-        Graphics.Viewport(0, 0, RelativeResolution.X, RelativeResolution.Y);
+        Graphics.Viewport(0, 0, RelativeResolution.X, RelativeResolution.Y); 
     }
 
     public static void SetVertexAttributePointer(uint index, int typeCount,
@@ -101,6 +101,7 @@ public class GraphicsContext : IDisposable
     private void Clear(InlineParameter_Three<ClearBufferMask> bufferMask)
     {
         Graphics.ClearColor(0, 0, 0, 1);
+        Graphics.ClearDepth(1.0f);
         Graphics.Clear(bufferMask[0] | bufferMask[1] | bufferMask[2]);
     }
 

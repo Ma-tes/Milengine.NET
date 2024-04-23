@@ -2,7 +2,6 @@ using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Interfaces;
 using Milengine.NET.Core.Structures;
 using Silk.NET.Maths;
-using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 
 namespace Milengine.NET.Core.SceneManager;
@@ -11,10 +10,10 @@ namespace Milengine.NET.Core.SceneManager;
 public class SceneHolder : IDisposable
 {
     internal CancellationTokenSource CancellationTokenSource { get; set; } = new();
-    internal MemoryMapper<ICamera> SceneCameraMapper { get; set; }
     internal ShaderAttacher Shader { get; set; }
 
-    public List<IRenderableObject> RenderableObjects { get; internal set; } = new();
+    public List<IRenderableObject> RenderableObjects { get; internal set; } = [];
+    public MemoryMapper<ICamera> SceneCameraMapper { get; set; }
 
     public virtual Action<IRenderableObject>? OnObjectInitialization { get; set; }
     public virtual Action<IRenderableObject>? OnObjectUpdate { get; set; }

@@ -11,7 +11,7 @@ namespace Milengine.NET.Core.Material;
 
 public sealed class TextureMapper : IGraphicsBindable
 {
-    internal Stack<TextureRenderParameter> RenderParameters { get; set; } = new();
+    public Stack<TextureRenderParameter> RenderParameters { get; set; } = new();
 
     public uint Handle { get; }
     public ImageDataSet<Rgba32> ImageTextureInformation { get; }

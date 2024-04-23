@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Milengine.NET.Core;
 using Milengine.NET.Core.Cameras;
 using Milengine.NET.Core.Graphics;
@@ -14,7 +13,7 @@ using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using Silk.NET.Windowing.Glfw;
 
-namespace Milengine.NET.Examples;
+namespace Milengine.NET_CreatingScene;
 
 public sealed class MainScene : SceneHolder
 {

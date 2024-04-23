@@ -59,7 +59,7 @@ public sealed class ViewCamera : ICamera, IRenderableObject
             GraphicsContext.Graphics.UniformMatrix4(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "uModel"),
                 1, false, (float*)&currentModelMatrix);
         }
-        CameraViewModel.VertexArrayBuffer.Bind(); 
+        CameraViewModel.VertexArrayBuffer.Bind();
         unsafe { GraphicsContext.Graphics.DrawArrays(GLEnum.Lines, 0, (uint)CameraViewModel.Vertices.Buffer.Length); }
     }
 
@@ -68,7 +68,7 @@ public sealed class ViewCamera : ICamera, IRenderableObject
         var currentView = Matrix4X4.CreateLookAt(
             Position,
             Position + CameraConfiguration.GetRelativeDirectionValue(Direction.Front).Value,
-            CameraConfiguration.GetRelativeDirectionValue(Direction.Up).Value 
+            CameraConfiguration.GetRelativeDirectionValue(Direction.Up).Value
         );
         return currentView;
     }

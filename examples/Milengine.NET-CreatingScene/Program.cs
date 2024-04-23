@@ -1,12 +1,11 @@
 ﻿using Milengine.NET.Core.Cameras;
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Interfaces;
-using Milengine.NET.Examples;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
 using Silk.NET.Windowing.Glfw;
 
-namespace Milengine.NET;
+namespace Milengine.NET_CreatingScene;
 public class Program
 {
     private static readonly WindowOptions windowOptions = WindowOptions.Default with
