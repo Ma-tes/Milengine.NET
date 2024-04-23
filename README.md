@@ -18,9 +18,8 @@ Currently every implementation is not going to stay as it is... The only file wh
 <br>
 
 ## Archive - Project stage - Fixed(22.04.2024)
+<img align="right" src="assets/Milengine.NET-2024-04-21.gif" width=350px height=250px>
 Recently, I have been trying to find and also fix, rendering artefacts, which always appears from the center point of specific collection of meshes.
-
-https://github.com/Ma-tes/Milengine.NET/assets/78597003/86f92b9e-c9ec-4199-bb05-d8f88113dc5f
 
 ### Solution
 Everything happened on this specific line [Model.cs - Line:51](https://github.com/Ma-tes/Milengine.NET/blob/0fe55309226b14ec59c51c25a1fcf98e0e5b38ce/src/Milengine.NET/Core/Model.cs#L51).
