@@ -30,7 +30,7 @@ GraphicsContext.Graphics.DrawArrays(GraphicsContext.Global.CurrentRenderingType,
 In a short sentence, this method invokes to OpenGL, which calls to draw multiple combinations of geometric data(Vertex, Normal, Texture coordinate, or color), in a one API call.
 Although, it may sound as a ideal solution, you must provide those geometric data in a certain offset as a one big allocated block of memory. So in some situations, when you are writing your own parser for individual format type, you would be limited, of how you are going to save geometric data.
 
-If you want more informations about this API call, you could found it on [khronos OpenGL documentation](https://registry.khronos.org/OpenGL-Refpages/gl4/html/glDrawArrays.xhtml).
+If you want more information about this API call, you could found it on [khronos OpenGL documentation](https://registry.khronos.org/OpenGL-Refpages/gl4/html/glDrawArrays.xhtml).
 
 
 **What caused the issue ?** Well... for rendering [Models](https://github.com/Ma-tes/Milengine.NET/blob/main/src/Milengine.NET/Core/Model.cs) from [Obj format](https://github.com/Ma-tes/Milengine.NET/blob/main/src/Milengine.NET/Parser/ObjFormat.cs), I specified `VertexFormatType`, which basically says order, of how the format parser is going to separate data.
@@ -45,7 +45,7 @@ protected override ImmutableArray<VertexFormatToken> vertexTokens { get; } = [
 ];
 ```
 
-For now, we could say that `new VertexFormatToken("f ", VerticesType.FacesInternal)` is irelevant. What we could deducate is, that our `obj` parser could handle three geometric data. So our indicies must do the same...
+For now, we could say that `new VertexFormatToken("f ", VerticesType.FacesInternal)` is irrelevant. What we could dedicate is, that our `obj` parser could handle three geometric data. So our indicies must do the same...
 >[!warning]
 >Indicies are containing three different sets of indexes.
 >[1, 1, 1] - [1, 1, 2] - [1, 2, 1]
@@ -55,7 +55,7 @@ Back to the problematic line - `GraphicsContext.Graphics.DrawArrays(GraphicsCont
 2. `int` first - Defines the starting index.
 3. `uint` count - Defines the number of indicies, which are going to be rendered.
 
-Have you found it ? The `uint` count, which I set as a `(uint)Meshes.Span[i].Indices.Buffer.Length` is not correct, because it is a count of all three types of geometric data. So... what ended up as a result, was a block of memory containing overflowing the original count.
+Have you found it ? The `uint` count, which I set as a `(uint)Meshes.Span[i].Indices.Buffer.Length` is not correct, because it is a count of all three types of geometric data. So... what ended up as a result, was a block of memory containing count that overflows actual count of geometric data(Vertex, Normal, Texture coordinate, or color).
 
 > [!important]
 > The count means, specific number of geometric data in memory block and not count of all indexes...
