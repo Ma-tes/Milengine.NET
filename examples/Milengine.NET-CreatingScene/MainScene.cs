@@ -64,9 +64,13 @@ public sealed class MainScene : SceneHolder
         var currentTextures = GraphicsContext.Global.TextureMapper.Textures.Span;
 
         int texturesCount = currentTextures.Length;
+
+        float planeAngle = 360.0f / texturesCount; 
+        float planeRadius = 100.0f;
         for (int i = 0; i < texturesCount; i++)
         {
-            Vector3D<float> modelPosition = new Vector3D<float>(20 * i, 0, 0);
+            float currentPlaneAngle = MathF.PI / 180.0f * (i * planeAngle);
+            Vector3D<float> modelPosition = new Vector3D<float>(planeRadius * MathF.Cos(currentPlaneAngle), 0, planeRadius * MathF.Sin(currentPlaneAngle));
             RenderableObjects.Add(
                 new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj"))
                 {
@@ -193,6 +197,8 @@ public sealed class MainScene : SceneHolder
         RenderableObjects[10].Rotation = Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitY, 1.0f * (float)Window.Time)
             * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitX, 1.0f * (float)Window.Time)
             * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitZ, 1.0f * (float)Window.Time);
+        
+        RenderableObjects[11].Position += Vector3D<float>.UnitY * MathF.Sin((float)Window.Time);
         Window.Title = Window.FramesPerSecond.ToString();
     }
 

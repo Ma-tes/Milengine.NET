@@ -14,7 +14,7 @@ public class GraphicsMesh : IFactoryInstance<GraphicsMesh, ReadOnlyMemory<Vertex
 
     internal MeshFormat MeshFormat { get; }
     internal VertexArrayBuffer<float, uint> VertexArrayBuffer { get; private set; }
-
+ 
     public GraphicsBufferData<float> Vertices { get; internal set; }
     public GraphicsBufferData<uint> Indices { get; internal set; }
 
@@ -47,8 +47,8 @@ public class GraphicsMesh : IFactoryInstance<GraphicsMesh, ReadOnlyMemory<Vertex
         VertexArrayBuffer.Bind();
         MeshFormat.Bind();
     }
-    //TODO: Implement the specific mesh updating.
 
+    //TODO: Implement the specific mesh updating.
     public void Dispose()
     {
         VertexArrayBuffer.Dispose();

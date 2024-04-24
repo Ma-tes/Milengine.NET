@@ -28,7 +28,6 @@ public class Model : IRenderableObject
     {
         int meshesLength = Meshes.Length;
         var meshesSpan = Meshes.Span;
-        //GraphicsContext.Global.TextureMapper.Bind();
         for (int i = 0; i < meshesLength; i++) { meshesSpan[i].LoadMesh(); }
     }
 
@@ -45,7 +44,7 @@ public class Model : IRenderableObject
         int meshesLength = Meshes.Length;
         for (int i = 0; i < meshesLength; i++)
         {
-            Meshes.Span[i].VertexArrayBuffer.Bind(); 
+            Meshes.Span[i].VertexArrayBuffer.Bind();
             TextureTemporaryHolder.LoadUnsafeTexture();
             TextureTemporaryHolder.Bind();
             unsafe { GraphicsContext.Graphics.DrawArrays(GraphicsContext.Global.CurrentRenderingType, 0, (uint)Meshes.Span[i].Indices.Buffer.Length / 3); }
