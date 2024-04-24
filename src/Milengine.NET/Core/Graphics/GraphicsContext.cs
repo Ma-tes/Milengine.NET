@@ -75,6 +75,9 @@ public class GraphicsContext : IDisposable
             GLEnum.Blend |
             GLEnum.CullFace
         );
+        Graphics.ClearDepth(1.0f);
+        Graphics.DepthFunc(GLEnum.Lequal);
+        Graphics.DepthMask(true);
         Graphics.FrontFace(FrontFaceDirection.Ccw); //Counter clock wise.
     }
 

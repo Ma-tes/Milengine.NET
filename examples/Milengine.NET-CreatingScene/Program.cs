@@ -12,6 +12,7 @@ public class Program
     {
         Size = new Vector2D<int>(1200, 600),
         Title = "Window test",
+        PreferredDepthBufferBits = 24
     };
 
     public static void Main()

@@ -2,6 +2,7 @@ using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Interfaces;
 using Milengine.NET.Core.Structures;
 using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 
 namespace Milengine.NET.Core.SceneManager;
@@ -54,7 +55,7 @@ public class SceneHolder : IDisposable
     {
         GraphicsContext.Global.GraphicsBeginFrameRender();
         ExecuteObjectsAction((IRenderableObject currentObject) =>
-         currentObject.OnUpdate((float)deltaTime), OnObjectUpdate);
+            currentObject.OnUpdate((float)deltaTime), OnObjectUpdate);
 
         float colorIndex = MathF.Abs(MathF.Sin((float)Window.Time / 2) - 0.25f);
         GraphicsContext.Graphics.Uniform3(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "additionalColor"),

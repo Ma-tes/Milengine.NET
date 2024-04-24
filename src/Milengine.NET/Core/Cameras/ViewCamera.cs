@@ -32,7 +32,7 @@ public sealed class ViewCamera : ICamera, IRenderableObject
         zoom: 1.0f,
         //Pixels per second
         sensivity: 1.0f,
-        clippingPlaneNear: 2f,
+        clippingPlaneNear: 0.1f,
         clippingPlaneFar: 500f,
         InlineValueParameter_Three<DirectionValue>.CreateInstance(
             new DirectionValue(Direction.Up, new(0.0f, 1.0f, 0.0f)),
@@ -43,12 +43,13 @@ public sealed class ViewCamera : ICamera, IRenderableObject
 
     public ViewCamera() { }
 
-    public void OnInitialization() 
+    public void OnInitialization()
     {
         graphicsMeshVertexData = CreateCameraMeshVertices(CameraConfiguration.ClippingPlaneNear, CameraConfiguration.ClippingPlaneFar);
         CameraViewModel = new GraphicsMesh([..graphicsMeshVertexData.Span], []);
         CameraViewModel.LoadMesh();
     }
+
     public void OnUpdate(float deltaTime) { }
 
     public void OnRender(float deltaTime)
