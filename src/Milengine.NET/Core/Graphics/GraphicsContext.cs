@@ -75,7 +75,6 @@ public class GraphicsContext : IDisposable
             GLEnum.Blend |
             GLEnum.CullFace
         );
-        Graphics.ClearDepth(1.0f);
         Graphics.DepthFunc(GLEnum.Lequal);
         Graphics.DepthMask(true);
         Graphics.FrontFace(FrontFaceDirection.Ccw); //Counter clock wise.
@@ -83,6 +82,7 @@ public class GraphicsContext : IDisposable
 
     public virtual void GraphicsBeginFrameRender()
     {
+        Graphics.Enable(GLEnum.DepthTest);
         Clear(
             InlineValueParameter_Three<ClearBufferMask>.CreateInstance(
                 ClearBufferMask.ColorBufferBit,
@@ -105,7 +105,7 @@ public class GraphicsContext : IDisposable
     {
         Graphics.ClearColor(0, 0, 0, 1);
         Graphics.ClearDepth(1.0f);
-        Graphics.Clear(bufferMask[0] | bufferMask[1] | bufferMask[2]);
+        Graphics.Clear((uint)(bufferMask[0] | bufferMask[1] | bufferMask[2]));
     }
 
     public void Dispose()

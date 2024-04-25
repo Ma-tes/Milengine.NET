@@ -53,13 +53,12 @@ public class SceneHolder : IDisposable
 
     public virtual void ExecuteObjectsUpdate(double deltaTime)
     {
-        GraphicsContext.Global.GraphicsBeginFrameRender();
         ExecuteObjectsAction((IRenderableObject currentObject) =>
             currentObject.OnUpdate((float)deltaTime), OnObjectUpdate);
 
-        float colorIndex = MathF.Abs(MathF.Sin((float)Window.Time / 2) - 0.25f);
-        GraphicsContext.Graphics.Uniform3(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "additionalColor"),
-            (colorIndex * colorIndex) - 0.25f, colorIndex + 0.25f, colorIndex + 0.2f);
+        //float colorIndex = MathF.Abs(MathF.Sin((float)Window.Time / 2) - 0.25f);
+        GraphicsContext.Graphics.Uniform3(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "additionalColor"), 1.0f, 1.0f, 1.0f);
+            //(colorIndex * colorIndex) - 0.25f, colorIndex + 0.25f, colorIndex + 0.2f);
     }
 
     public virtual void ExecuteObjectsRender(double deltaTime)
