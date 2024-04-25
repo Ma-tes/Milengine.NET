@@ -1,8 +1,8 @@
 using System.Numerics;
+using Milengine.NET.Core.Camera.Structures;
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Graphics.Structures;
 using Milengine.NET.Core.Interfaces;
-using Milengine.NET.Core.Structures;
 using Milengine.NET.Core.Utilities.InlineOptimalizations.Buffers.InlineParameterBuffer;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
@@ -30,7 +30,6 @@ public sealed class ViewCamera : ICamera, IRenderableObject
     public CameraConfiguration CameraConfiguration { get; set; } = new(
         fieldOfView: 90.0f,
         zoom: 1.0f,
-        //Pixels per second
         sensivity: 1.0f,
         clippingPlaneNear: 0.1f,
         clippingPlaneFar: 500f,
@@ -46,7 +45,6 @@ public sealed class ViewCamera : ICamera, IRenderableObject
     public void OnInitialization()
     {
         graphicsMeshVertexData = CreateCameraMeshVertices(CameraConfiguration.ClippingPlaneNear, CameraConfiguration.ClippingPlaneFar);
-
         CameraViewModel = new GraphicsMesh([..graphicsMeshVertexData.Span], []);
         CameraViewModel.LoadMesh();
     }
@@ -107,7 +105,7 @@ public sealed class ViewCamera : ICamera, IRenderableObject
             GetRadiansFromDegrees(CameraConfiguration.FieldOfView),
                 GraphicsContext.Global.Window.FramebufferSize.X / GraphicsContext.Global.Window.FramebufferSize.Y,
                     CameraConfiguration.ClippingPlaneNear, CameraConfiguration.ClippingPlaneFar
-        );
+    );
 
     private static Memory<Vertex<float>> CreateCameraMeshVertices(float nearPlane, float farPlane)
     {
@@ -116,14 +114,14 @@ public sealed class ViewCamera : ICamera, IRenderableObject
         InlineParameter_Two<float> planes = InlineValueParameter_Two<float>.CreateInstance(
             nearPlane, farPlane
         );
+
         int planesLength = InlineParameter_Two<float>.Length;
         for (int i = 0; i < planesLength; i++)
         {
-            float currentPlane = planes[i];
-            int relativeVerticesIndex = i * 16;
-            float verticesPosition = Math.Clamp(currentPlane / 50, 1.0f, 500.0f);
+            float verticesPosition = Math.Clamp(planes[i] / 50, 1.0f, 500.0f);
             float verticesYPositionIndexer = i * -0.5f;
 
+            int relativeVerticesIndex = i * 16;
             verticesSpan[relativeVerticesIndex] = new(new Vector3D<float>(-1.0f * verticesPosition,
                 verticesYPositionIndexer + 0.0f, verticesPosition));
             verticesSpan[relativeVerticesIndex + 1] = new(new Vector3D<float>(1.0f * verticesPosition,

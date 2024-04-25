@@ -2,7 +2,7 @@ using Milengine.NET.Core.Utilities;
 using Milengine.NET.Core.Utilities.InlineOptimalizations.Buffers.InlineParameterBuffer;
 using Silk.NET.Maths;
 
-namespace Milengine.NET.Core.Structures;
+namespace Milengine.NET.Core.Camera.Structures;
 
 public enum Direction : uint
 {
