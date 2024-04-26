@@ -12,9 +12,9 @@ public class Model : IRenderableObject
     public Vector3D<float> Position { get; set; } = Vector3D<float>.Zero;
     public Quaternion<float> Rotation { get; set; } = Quaternion<float>.Identity;
     public float Scale { get; set; } = 1.0f;
-    public Matrix4x4 ViewMatrix =>
-        Matrix4x4.Identity * Matrix4x4.CreateFromQuaternion(new Quaternion(Rotation.X, Rotation.Y, Rotation.Z, Rotation.W))
-        * Matrix4x4.CreateScale(Scale) * Matrix4x4.CreateTranslation(new Vector3(Position.X, Position.Y, Position.Z));
+    public Matrix4X4<float> ViewMatrix =>
+        Matrix4X4<float>.Identity * Matrix4X4.CreateFromQuaternion(new Quaternion<float>(Rotation.X, Rotation.Y, Rotation.Z, Rotation.W))
+        * Matrix4X4.CreateScale<float>(Scale) * Matrix4X4.CreateTranslation<float>(new Vector3D(Position.X, Position.Y, Position.Z));
 
     public ReadOnlyMemory<GraphicsMesh> Meshes { get; protected set; }
     public Texture TextureTemporaryHolder { get; set; }

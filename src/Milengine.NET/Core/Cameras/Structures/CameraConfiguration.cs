@@ -1,29 +1,10 @@
+using Milengine.NET.Core.Cameras;
 using Milengine.NET.Core.Utilities;
 using Milengine.NET.Core.Utilities.InlineOptimalizations.Buffers.InlineParameterBuffer;
-using Silk.NET.Maths;
 
 namespace Milengine.NET.Core.Camera.Structures;
 
-public enum Direction : uint
-{
-    Up = 0,
-    Right = 2,
-    Front = 4,
-}
-
-public sealed class DirectionValue
-{
-    public Direction Direction { get; }
-    public Vector3D<float> Value { get; set; }
-
-    public DirectionValue(Direction direction, Vector3D<float> value)
-    {
-        Direction = direction;
-        Value = value;
-    }
-}
-
-public sealed class CameraConfiguration 
+public sealed class CameraConfiguration
 {
     public float FieldOfView { get; set; }
     public float Zoom { get; set; }

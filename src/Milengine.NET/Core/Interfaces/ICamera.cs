@@ -1,4 +1,4 @@
-using Milengine.NET.Core.Structures;
+using Milengine.NET.Core.Camera.Structures;
 using Silk.NET.Maths;
 
 namespace Milengine.NET.Core.Interfaces;

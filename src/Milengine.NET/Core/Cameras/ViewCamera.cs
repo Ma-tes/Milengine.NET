@@ -12,14 +12,15 @@ namespace Milengine.NET.Core.Cameras;
 public sealed class ViewCamera : ICamera, IRenderableObject
 {
     private Memory<Vertex<float>> graphicsMeshVertexData;
-
+ 
     public Vector3D<float> Position { get; set; } = Vector3D<float>.Zero;
     public Quaternion<float> Rotation { get; set; } = Quaternion<float>.Identity;
 
     public float Scale { get; set; } = 5.0f;
-    public Matrix4x4 ViewMatrix =>
-        Matrix4x4.Identity * Matrix4x4.CreateFromQuaternion(Quaternion.CreateFromYawPitchRoll(Yaw, Pitch, 0.0f))
-            * Matrix4x4.CreateScale(Scale) * Matrix4x4.CreateTranslation(new Vector3(Position.X, Position.Y, Position.Z));
+    public Matrix4X4<float> ViewMatrix =>
+        Matrix4X4<float>.Identity * CalculateCameraView()
+            * Matrix4X4.CreateScale(Scale) * Matrix4X4.CreateTranslation(
+                new Vector3D<float>(Position.X, Position.Y, Position.Z));
 
     public float Yaw { get; internal set; } = -90.0f;
     public float Pitch { get; internal set; } = 0.0f;
@@ -55,7 +56,7 @@ public sealed class ViewCamera : ICamera, IRenderableObject
     {
         unsafe
         {
-            Matrix4x4 currentModelMatrix = ViewMatrix;
+            Matrix4X4<float> currentModelMatrix = ViewMatrix;
             GraphicsContext.Graphics.UniformMatrix4(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "uModel"),
                 1, false, (float*)&currentModelMatrix);
         }
