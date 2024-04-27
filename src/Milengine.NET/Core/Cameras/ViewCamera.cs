@@ -1,4 +1,3 @@
-using System.Numerics;
 using Milengine.NET.Core.Camera.Structures;
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Graphics.Structures;
@@ -17,10 +16,10 @@ public sealed class ViewCamera : ICamera, IRenderableObject
     public Quaternion<float> Rotation { get; set; } = Quaternion<float>.Identity;
 
     public float Scale { get; set; } = 5.0f;
-    public Matrix4X4<float> ViewMatrix =>
-        Matrix4X4<float>.Identity * CalculateCameraView()
-            * Matrix4X4.CreateScale(Scale) * Matrix4X4.CreateTranslation(
-                new Vector3D<float>(Position.X, Position.Y, Position.Z));
+    public Matrix4X4<float> ViewMatrix => CalculateCameraView();
+        //Matrix4X4<float>.Identity * (Quaternion<float>.CreateFromRotationMatrix(CalculateCameraView()) * new Quaternion<float>(0, 0, 0, 1))
+        //    * Matrix4X4.CreateScale(Scale) * Matrix4X4.CreateTranslation(
+        //        new Vector3D<float>(Position.X, Position.Y, Position.Z));
 
     public float Yaw { get; internal set; } = -90.0f;
     public float Pitch { get; internal set; } = 0.0f;

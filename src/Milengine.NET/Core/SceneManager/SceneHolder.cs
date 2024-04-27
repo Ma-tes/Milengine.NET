@@ -2,7 +2,6 @@ using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Interfaces;
 using Milengine.NET.Core.Structures;
 using Silk.NET.Maths;
-using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 
 namespace Milengine.NET.Core.SceneManager;
