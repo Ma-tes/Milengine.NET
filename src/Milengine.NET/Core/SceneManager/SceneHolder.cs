@@ -23,6 +23,7 @@ public class SceneHolder : IDisposable
     public ref ICamera CurrentCamera => ref SceneCameraMapper.GetValueReference();
  
     public IWindow Window { get; }
+    public bool IsInitializated { get; set; } = false;
 
     public TickCounter CurrentFrameTick { get; }
 
@@ -31,6 +32,13 @@ public class SceneHolder : IDisposable
         SceneCameraMapper = new MemoryMapper<ICamera>(sceneCameras);
         CurrentFrameTick = new TickCounter(1);
         Window = window;
+        RenderableObjects.AddRange(GetRelativeRenderableCameras(sceneCameras.Span.ToArray()));
+    }
+
+    public SceneHolder(Memory<ICamera> sceneCameras)
+    {
+        SceneCameraMapper = new MemoryMapper<ICamera>(sceneCameras);
+        CurrentFrameTick = new TickCounter(1);
         RenderableObjects.AddRange(GetRelativeRenderableCameras(sceneCameras.Span.ToArray()));
     }
 
@@ -57,7 +65,7 @@ public class SceneHolder : IDisposable
 
         //float colorIndex = MathF.Abs(MathF.Sin((float)Window.Time / 2) - 0.25f);
         GraphicsContext.Graphics.Uniform3(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "additionalColor"), 1.0f, 1.0f, 1.0f);
-            //(colorIndex * colorIndex) - 0.25f, colorIndex + 0.25f, colorIndex + 0.2f);
+            //colorIndex * colorIndex) - 0.25f, colorIndex + 0.25f, colorIndex + 0.2f);
     }
 
     public virtual void ExecuteObjectsRender(double deltaTime)

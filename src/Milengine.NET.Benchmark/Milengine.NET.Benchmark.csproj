@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\src\Milengine.NET\Milengine.NET.csproj" />
+    <ProjectReference Include="..\Milengine.NET\Milengine.NET.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
