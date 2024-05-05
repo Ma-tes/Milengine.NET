@@ -38,7 +38,6 @@ public class GraphicsMesh : IFactoryInstance<GraphicsMesh, ReadOnlyMemory<Vertex
         MeshFormat = new MeshFormat(meshFormatContainer);
     }
 
-
     //TODO: Use for return a specific result type, for
     //better exception handling.
     public virtual void LoadMesh()

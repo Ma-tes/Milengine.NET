@@ -14,7 +14,7 @@ public class SceneHolder : IDisposable
 
     public List<IRenderableObject> RenderableObjects { get; internal set; } = [];
     public MemoryMapper<ICamera> SceneCameraMapper { get; set; }
-
+ 
     public virtual Action<IRenderableObject>? OnObjectInitialization { get; set; }
     public virtual Action<IRenderableObject>? OnObjectUpdate { get; set; }
     public virtual Action<IRenderableObject>? OnObjectRender { get; set; }
@@ -48,6 +48,12 @@ public class SceneHolder : IDisposable
         Window.Update += ExecuteObjectsUpdate;
         Window.Render += ExecuteObjectsRender;
     }
+    public void Deinitializate()
+    {
+        Window.Load -= ExecuteObjectsInitialization;
+        Window.Update -= ExecuteObjectsUpdate;
+        Window.Render -= ExecuteObjectsRender;
+    }
 
     public virtual void ExecuteObjectsInitialization()
     {
@@ -56,6 +62,7 @@ public class SceneHolder : IDisposable
 
         ExecuteObjectsAction((IRenderableObject currentObject) =>
             currentObject.OnInitialization(), OnObjectInitialization);
+        IsInitializated = true;
     }
 
     public virtual void ExecuteObjectsUpdate(double deltaTime)

@@ -15,7 +15,7 @@ using Silk.NET.Windowing.Glfw;
 
 namespace Milengine.NET_CreatingScene;
 
-public sealed class MainScene : SceneHolder
+public sealed class SecondScene : SceneHolder
 {
     private IKeyboard keyboard = null!;
     private IMouse mouse = null!;
@@ -26,7 +26,7 @@ public sealed class MainScene : SceneHolder
 
     public bool InputCurrentStatePress { get; private set; } = false;
 
-    public MainScene(IWindow window, Memory<ICamera> sceneCameras)
+    public SecondScene(IWindow window, Memory<ICamera> sceneCameras)
         : base(window, sceneCameras)
     {
     }
@@ -78,53 +78,6 @@ public sealed class MainScene : SceneHolder
                     Position = modelPosition
                 });
         }
-        RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Char1.obj"))
-            {
-                TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[0]
-            });
-        RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/ass_rifle.obj"))
-            {
-                TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[2],
-                Position = Vector3D<float>.UnitX * 20.0f,
-                Scale = 0.02f
-            });
-        RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/pistol.obj"))
-            {
-                TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[2],
-                Position = Vector3D<float>.UnitX * 40.0f,
-                Scale = 0.2f
-            });
-        RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/mecha.obj"))
-            {
-                TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[1],
-                Position = Vector3D<float>.UnitX * 100.0f
-            });
-
-        float planetMaxPosition = 100.0f;
-        int planetCount = 10;
-        for(int i = 0; i < planetCount; i++)
-        {
-            var planetPosition = new Vector3D<float>(
-                (float)Random.Shared.NextDouble() * planetMaxPosition * MathF.Sin((float)Window.Time * 5),
-                (float)Random.Shared.NextDouble() * planetMaxPosition,
-                (float)Random.Shared.NextDouble() * planetMaxPosition  * MathF.Cos((float)Window.Time * 5)
-            );
-
-            int currentTextureIndex = i % texturesCount;
-            RenderableObjects.Add(
-                new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/planeta.obj"))
-                {
-                    TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[currentTextureIndex],
-                    Position = planetPosition,
-                    Scale = 2.0f
-                });
-        }
-
-
         base.ExecuteObjectsInitialization();
     }
 
@@ -154,19 +107,8 @@ public sealed class MainScene : SceneHolder
                 viewCamera.Position += Vector3D<float>.UnitY * cameraVelocity * (float)deltaTime;
             if(keyboard.IsKeyPressed(Key.ShiftLeft))
                 viewCamera.Position -= Vector3D<float>.UnitY * cameraVelocity * (float)deltaTime;
-
             if(keyboard.IsKeyPressed(Key.ShiftLeft))
                 viewCamera.Position -= Vector3D<float>.UnitY * cameraVelocity * (float)deltaTime;
-
-            if(keyboard.IsKeyPressed(Key.O))
-                viewCamera.CameraConfiguration.FieldOfView = CalculateRelativeFieldOfView(viewCamera.CameraConfiguration.FieldOfView + 0.25f);
-            if(keyboard.IsKeyPressed(Key.P))
-                viewCamera.CameraConfiguration.FieldOfView = CalculateRelativeFieldOfView(viewCamera.CameraConfiguration.FieldOfView - 0.25f);
-
-            if(keyboard.IsKeyPressed(Key.Number1))
-                GraphicsContext.Global.CurrentRenderingType = GLEnum.Triangles;
-            if(keyboard.IsKeyPressed(Key.Number2))
-                GraphicsContext.Global.CurrentRenderingType = GLEnum.LineStrip; 
 
             Vector2D<float> mousePosition = !isMouseEnable ? new Vector2D<float>(mouse.Position.X, mouse.Position.Y) : lastMousePosition;
             viewCamera.CalculateMouseViewDirections(mousePosition, lastMousePosition);
@@ -189,18 +131,6 @@ public sealed class MainScene : SceneHolder
             if(key == Key.E)
                 SceneCameraMapper.MapIndex = (SceneCameraMapper.MapIndex + 1) % SceneCameraMapper.Values.Length;
         };
-
-        int objectsCount = RenderableObjects.Count;
-        RenderableObjects[9].Rotation = Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitY, 1.0f * (float)Window.Time)
-            * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitX, 1.0f * (float)Window.Time)
-            * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitZ, 1.0f * (float)Window.Time);
-        RenderableObjects[10].Rotation = Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitY, 1.0f * (float)Window.Time)
-            * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitX, 1.0f * (float)Window.Time)
-            * Quaternion<float>.CreateFromAxisAngle(Vector3D<float>.UnitZ, 1.0f * (float)Window.Time);
-        
-        RenderableObjects[10].Position += Vector3D<float>.UnitX * (MathF.Sin((float)Window.Time) / 100);
-         
-        RenderableObjects[11].Position += Vector3D<float>.UnitY * MathF.Sin((float)Window.Time);
         Window.Title = Window.FramesPerSecond.ToString();
     }
 
