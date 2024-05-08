@@ -150,7 +150,6 @@ public sealed class ViewCamera : ICamera, IRenderableObject
         return vertices;
     }
 
-
     private static float GetRadiansFromDegrees(float degree) =>
         MathF.PI / 180.0f * degree;
 }

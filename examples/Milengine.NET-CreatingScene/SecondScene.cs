@@ -23,6 +23,7 @@ public sealed class SecondScene : SceneHolder
 
     private float cameraVelocity = 25.0f;
     private bool isMouseEnable = false;
+    private bool isMouseHold = false;
 
     public bool InputCurrentStatePress { get; private set; } = false;
 
@@ -83,37 +84,57 @@ public sealed class SecondScene : SceneHolder
 
     public override void ExecuteObjectsUpdate(double deltaTime)
     {
+        Vector2D<float> mousePosition = !isMouseEnable ? new Vector2D<float>(mouse.Position.X, mouse.Position.Y) : lastMousePosition;
         base.ExecuteObjectsUpdate(deltaTime);
+        if(keyboard.IsKeyPressed(Key.W))
+            CurrentCamera.Position +=
+                CurrentCamera.CameraConfiguration.GetRelativeDirectionValue(Direction.Front).Value * cameraVelocity * (float)deltaTime;
+        if(keyboard.IsKeyPressed(Key.S))
+            CurrentCamera.Position -=
+                CurrentCamera.CameraConfiguration.GetRelativeDirectionValue(Direction.Front).Value * cameraVelocity * (float)deltaTime;
+        if(keyboard.IsKeyPressed(Key.A))
+            CurrentCamera.Position -=
+                Vector3D.Normalize(Vector3D.Cross(
+                    CurrentCamera.CameraConfiguration.GetRelativeDirectionValue(Direction.Front).Value,
+                    CurrentCamera.CameraConfiguration.GetRelativeDirectionValue(Direction.Up).Value)) * cameraVelocity * (float)deltaTime;
+        if(keyboard.IsKeyPressed(Key.D))
+            CurrentCamera.Position +=
+                Vector3D.Normalize(Vector3D.Cross(
+                    CurrentCamera.CameraConfiguration.GetRelativeDirectionValue(Direction.Front).Value,
+                    CurrentCamera.CameraConfiguration.GetRelativeDirectionValue(Direction.Up).Value)) * cameraVelocity * (float)deltaTime;
+
+
         if(CurrentCamera is ViewCamera viewCamera)
         {
-            if(keyboard.IsKeyPressed(Key.W))
-                viewCamera.Position +=
-                    viewCamera.CameraConfiguration.GetRelativeDirectionValue(Direction.Front).Value * cameraVelocity * (float)deltaTime;
-            if(keyboard.IsKeyPressed(Key.S))
-                viewCamera.Position -=
-                    viewCamera.CameraConfiguration.GetRelativeDirectionValue(Direction.Front).Value * cameraVelocity * (float)deltaTime;
-            if(keyboard.IsKeyPressed(Key.A))
-                viewCamera.Position -=
-                    Vector3D.Normalize(Vector3D.Cross(
-                        viewCamera.CameraConfiguration.GetRelativeDirectionValue(Direction.Front).Value,
-                        viewCamera.CameraConfiguration.GetRelativeDirectionValue(Direction.Up).Value)) * cameraVelocity * (float)deltaTime;
-            if(keyboard.IsKeyPressed(Key.D))
-                viewCamera.Position +=
-                    Vector3D.Normalize(Vector3D.Cross(
-                        viewCamera.CameraConfiguration.GetRelativeDirectionValue(Direction.Front).Value,
-                        viewCamera.CameraConfiguration.GetRelativeDirectionValue(Direction.Up).Value)) * cameraVelocity * (float)deltaTime;
-
             if(keyboard.IsKeyPressed(Key.Space))
-                viewCamera.Position += Vector3D<float>.UnitY * cameraVelocity * (float)deltaTime;
+                CurrentCamera.Position += Vector3D<float>.UnitY * cameraVelocity * (float)deltaTime;
             if(keyboard.IsKeyPressed(Key.ShiftLeft))
-                viewCamera.Position -= Vector3D<float>.UnitY * cameraVelocity * (float)deltaTime;
-            if(keyboard.IsKeyPressed(Key.ShiftLeft))
-                viewCamera.Position -= Vector3D<float>.UnitY * cameraVelocity * (float)deltaTime;
+                CurrentCamera.Position -= Vector3D<float>.UnitY * cameraVelocity * (float)deltaTime;
 
-            Vector2D<float> mousePosition = !isMouseEnable ? new Vector2D<float>(mouse.Position.X, mouse.Position.Y) : lastMousePosition;
             viewCamera.CalculateMouseViewDirections(mousePosition, lastMousePosition);
             lastMousePosition = mousePosition;
         }
+        if(CurrentCamera is SceneCamera sceneCamera)
+        {
+            if(keyboard.IsKeyPressed(Key.N))
+                CurrentCamera.CameraConfiguration.Zoom = Math.Clamp(CurrentCamera.CameraConfiguration.Zoom + 0.1f, 1.0f, 100.0f);
+            if(keyboard.IsKeyPressed(Key.M))
+                CurrentCamera.CameraConfiguration.Zoom = Math.Clamp(CurrentCamera.CameraConfiguration.Zoom - 0.1f, 1.0f, 100.0f);
+
+            isMouseEnable = false;
+            mouse.MouseDown += (IMouse mouse, Silk.NET.Input.MouseButton button) => { lastMousePosition = new(mouse.Position.X, mouse.Position.Y); isMouseHold = true; };
+            mouse.MouseUp += (IMouse mouse, Silk.NET.Input.MouseButton button) => { isMouseHold = false; };
+
+            if(isMouseHold)
+            {
+                float relativePositionX = mouse.Position.X - lastMousePosition.X;
+                float relativePositionY = mouse.Position.Y - lastMousePosition.Y;
+                sceneCamera.Position -= Vector3D<float>.UnitX * relativePositionX * (cameraVelocity / 10) * (float)deltaTime;
+                sceneCamera.Position += Vector3D<float>.UnitY * relativePositionY * (cameraVelocity / 10) * (float)deltaTime;
+            }
+            lastMousePosition = new(mouse.Position.X, mouse.Position.Y);
+        }
+        
         keyboard.KeyUp += (IKeyboard keyboard, Key key, int value) =>
         {
             if(key == Key.Escape)
@@ -131,6 +152,7 @@ public sealed class SecondScene : SceneHolder
             if(key == Key.E)
                 SceneCameraMapper.MapIndex = (SceneCameraMapper.MapIndex + 1) % SceneCameraMapper.Values.Length;
         };
+
         Window.Title = Window.FramesPerSecond.ToString();
     }
 

@@ -30,7 +30,8 @@ public class Program
                 new ViewCamera() { Position = 20 * Vector3D<float>.UnitY}
             ])),
             new SecondScene(currentWindow, new Memory<ICamera>([
-                new ViewCamera()
+                new ViewCamera(),
+                new SceneCamera()
             ]))
         );
         GraphicsContext.Global = new GraphicsContext(currentWindow)
