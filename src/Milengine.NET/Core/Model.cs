@@ -13,11 +13,11 @@ public class Model : IRenderableObject
     public float Scale { get; set; } = 1.0f;
     public Matrix4X4<float> ViewMatrix =>
         Matrix4X4<float>.Identity * Matrix4X4.CreateFromQuaternion(new Quaternion<float>(Rotation.X, Rotation.Y, Rotation.Z, Rotation.W))
-        * Matrix4X4.CreateScale(Scale) * Matrix4X4.CreateTranslation(new Vector3D<float>(Position.X, Position.Y, Position.Z));
+            * Matrix4X4.CreateScale(Scale) * Matrix4X4.CreateTranslation(new Vector3D<float>(Position.X, Position.Y, Position.Z));
 
     public ReadOnlyMemory<GraphicsMesh> Meshes { get; protected set; }
     public Texture TextureTemporaryHolder { get; set; }
-
+  
     public Model(ReadOnlyMemory<GraphicsMesh> meshes)
     {
         Meshes = meshes;

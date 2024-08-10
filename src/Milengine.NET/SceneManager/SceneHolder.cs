@@ -4,7 +4,7 @@ using Milengine.NET.Core.Structures;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
 
-namespace Milengine.NET.Core.SceneManager;
+namespace Milengine.NET.SceneManager;
 
 //TODO: Add specific tag function, with related reflection/source generator.
 public class SceneHolder : IDisposable
@@ -70,9 +70,8 @@ public class SceneHolder : IDisposable
         ExecuteObjectsAction((IRenderableObject currentObject) =>
             currentObject.OnUpdate((float)deltaTime), OnObjectUpdate);
 
-        //float colorIndex = MathF.Abs(MathF.Sin((float)Window.Time / 2) - 0.25f);
+        //TODO: Remove testing uniform3 from relative shader handle.
         GraphicsContext.Graphics.Uniform3(GraphicsContext.Graphics.GetUniformLocation(GraphicsContext.Global.ShaderHandle, "additionalColor"), 1.0f, 1.0f, 1.0f);
-            //colorIndex * colorIndex) - 0.25f, colorIndex + 0.25f, colorIndex + 0.2f);
     }
 
     public virtual void ExecuteObjectsRender(double deltaTime)

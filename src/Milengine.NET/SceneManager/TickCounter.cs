@@ -1,6 +1,6 @@
 using Milengine.NET.Core.Graphics;
 
-namespace Milengine.NET.Core.SceneManager;
+namespace Milengine.NET.SceneManager;
 
 public struct TickCounter
 {

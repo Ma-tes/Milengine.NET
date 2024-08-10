@@ -1,6 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <Reference Include="..\..\src\Milengine.NET\bin\Debug\net8.0\Milengine.NET.dll"/>
+    <Reference Include="..\..\src\Milengine.NET\bin\Debug\net8.0\Milengine.NET.dll" />
   </ItemGroup>
   <PropertyGroup>
     <OutputType>Exe</OutputType>

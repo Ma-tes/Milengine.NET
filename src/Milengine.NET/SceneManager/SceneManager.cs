@@ -1,7 +1,7 @@
 using Milengine.NET.Core.Structures;
 using Silk.NET.Windowing;
 
-namespace Milengine.NET.Core.SceneManager;
+namespace Milengine.NET.SceneManager;
 
 public class SceneManager : IDisposable
 {

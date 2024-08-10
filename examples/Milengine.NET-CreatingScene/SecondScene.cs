@@ -4,7 +4,6 @@ using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Interfaces;
 using Milengine.NET.Core.Material;
 using Milengine.NET.Core.SceneManager;
-using Milengine.NET.Core.Structures;
 using Milengine.NET.Parser;
 using Silk.NET.GLFW;
 using Silk.NET.Input;
@@ -48,7 +47,7 @@ public sealed class SecondScene : SceneHolder
             );
         }
         GraphicsContext.Global.TextureMapper = new TextureMapper(
-            @"/Users/mates/Downloads/TextingTextureMap.png",
+            MainScene.EnvironmentAssetsPath + "TextureMap.png",
             GLEnum.Texture2D,
             new Vector2D<int>(64, 64)
         );
@@ -73,7 +72,7 @@ public sealed class SecondScene : SceneHolder
             float currentPlaneAngle = MathF.PI / 180.0f * (i * planeAngle);
             Vector3D<float> modelPosition = new Vector3D<float>(planeRadius * MathF.Cos(currentPlaneAngle), 0, planeRadius * MathF.Sin(currentPlaneAngle));
             RenderableObjects.Add(
-                new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj"))
+                new Model(objectModel.LoadFormatModelData(MainScene.EnvironmentAssetsPath + "Floor.obj"))
                 {
                     TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[i],
                     Position = modelPosition
@@ -102,7 +101,8 @@ public sealed class SecondScene : SceneHolder
                 Vector3D.Normalize(Vector3D.Cross(
                     CurrentCamera.CameraConfiguration.GetRelativeDirectionValue(Direction.Front).Value,
                     CurrentCamera.CameraConfiguration.GetRelativeDirectionValue(Direction.Up).Value)) * cameraVelocity * (float)deltaTime;
-
+            if(keyboard.IsKeyPressed(Key.E))
+                SceneCameraMapper.MapIndex = (SceneCameraMapper.MapIndex + 1) % SceneCameraMapper.Values.Length;
 
         if(CurrentCamera is ViewCamera viewCamera)
         {
@@ -149,8 +149,6 @@ public sealed class SecondScene : SceneHolder
                 }
                 isMouseEnable = !isMouseEnable;
             }
-            if(key == Key.E)
-                SceneCameraMapper.MapIndex = (SceneCameraMapper.MapIndex + 1) % SceneCameraMapper.Values.Length;
         };
 
         Window.Title = Window.FramesPerSecond.ToString();

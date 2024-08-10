@@ -1,3 +1,4 @@
+using System.Reflection;
 using Milengine.NET.Core;
 using Milengine.NET.Core.Cameras;
 using Milengine.NET.Core.Graphics;
@@ -17,6 +18,8 @@ namespace Milengine.NET_CreatingScene;
 
 public sealed class MainScene : SceneHolder
 {
+    internal readonly static string EnvironmentAssetsPath = Path.Combine(Environment.CurrentDirectory, "assets/");
+
     private IKeyboard keyboard = null!;
     private IMouse mouse = null!;
     private Vector2D<float> lastMousePosition = Vector2D<float>.Zero;
@@ -46,8 +49,9 @@ public sealed class MainScene : SceneHolder
                 CursorModeValue.CursorDisabled 
             );
         }
+        string currentPath = EnvironmentAssetsPath;
         GraphicsContext.Global.TextureMapper = new TextureMapper(
-            @"/Users/mates/Downloads/TextingTextureMap.png",
+            EnvironmentAssetsPath + "TextureMap.png",
             GLEnum.Texture2D,
             new Vector2D<int>(64, 64)
         );
@@ -72,33 +76,33 @@ public sealed class MainScene : SceneHolder
             float currentPlaneAngle = MathF.PI / 180.0f * (i * planeAngle);
             Vector3D<float> modelPosition = new Vector3D<float>(planeRadius * MathF.Cos(currentPlaneAngle), 0, planeRadius * MathF.Sin(currentPlaneAngle));
             RenderableObjects.Add(
-                new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Podlaha.obj"))
+                new Model(objectModel.LoadFormatModelData(EnvironmentAssetsPath + "Floor.obj"))
                 {
                     TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[i],
                     Position = modelPosition
                 });
         }
         RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/Char1.obj"))
+            new Model(objectModel.LoadFormatModelData(EnvironmentAssetsPath + "CharacterOne.obj"))
             {
                 TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[0]
             });
         RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/ass_rifle.obj"))
+            new Model(objectModel.LoadFormatModelData(EnvironmentAssetsPath + "Rifle.obj"))
             {
                 TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[2],
                 Position = Vector3D<float>.UnitX * 20.0f,
                 Scale = 0.02f
             });
         RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/pistol.obj"))
+            new Model(objectModel.LoadFormatModelData(EnvironmentAssetsPath + "Weapon.obj"))
             {
                 TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[2],
                 Position = Vector3D<float>.UnitX * 40.0f,
                 Scale = 0.2f
             });
         RenderableObjects.Add(
-            new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/mecha.obj"))
+            new Model(objectModel.LoadFormatModelData(EnvironmentAssetsPath + "CharacterTwo.obj"))
             {
                 TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[1],
                 Position = Vector3D<float>.UnitX * 100.0f
@@ -116,7 +120,7 @@ public sealed class MainScene : SceneHolder
 
             int currentTextureIndex = i % texturesCount;
             RenderableObjects.Add(
-                new Model(objectModel.LoadFormatModelData(@"/Users/mates/Downloads/planeta.obj"))
+                new Model(objectModel.LoadFormatModelData(EnvironmentAssetsPath + "Planet.obj"))
                 {
                     TextureTemporaryHolder = GraphicsContext.Global.TextureMapper.Textures.Span[currentTextureIndex],
                     Position = planetPosition,

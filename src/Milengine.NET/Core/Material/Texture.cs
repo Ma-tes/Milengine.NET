@@ -1,5 +1,6 @@
 using Milengine.NET.Core.Graphics;
 using Milengine.NET.Core.Graphics.Interfaces;
+using Milengine.NET.Core.Material;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 
@@ -21,7 +22,7 @@ public struct Texture : IGraphicsBindable
 {
     public string Identificator { get; }
     public Vector2D<int> Position { get; }
-
+ 
     public uint Handle { get; }
 
     public Stack<TextureRenderParameter> RenderParameters { get; set; } = new();
@@ -34,7 +35,7 @@ public struct Texture : IGraphicsBindable
 
     public unsafe void LoadUnsafeTexture()
     {
-        var textureMapper = GraphicsContext.Global.TextureMapper;
+        TextureMapper textureMapper = GraphicsContext.Global.TextureMapper;
         var textureMapData = textureMapper.RelativeTextureMapData.Span;
 
         int textureWidth = textureMapper.TextureMapSize.X;
@@ -43,8 +44,7 @@ public struct Texture : IGraphicsBindable
         {
             int relativePositionX = Position.X / textureWidth
                 * textureWidth * textureHeight + (textureWidth * i);
-            GraphicsContext.Graphics.TexSubImage2D(
-                textureMapper.TextureType, 0, 0, i,
+            GraphicsContext.Graphics.TexSubImage2D(textureMapper.TextureType, 0, 0, i,
                 (uint)textureWidth, 1,
                 GLEnum.Rgba,
                 GLEnum.UnsignedByte,
